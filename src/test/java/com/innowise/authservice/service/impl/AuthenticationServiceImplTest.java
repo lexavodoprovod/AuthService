@@ -159,11 +159,11 @@ class AuthenticationServiceImplTest {
             when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .thenReturn(null);
 
-            AuthenticationResponseDto response = authenticationService.authenticate(loginDto);
+            AuthenticationResponseDto responseDto = authenticationService.authenticate(loginDto);
 
-            assertNotNull(response);
-            assertEquals(accessToken, response.getAccessToken());
-            assertEquals(refreshToken, response.getRefreshToken());
+            assertNotNull(responseDto);
+            assertEquals(accessToken, responseDto.getAccessToken());
+            assertEquals(refreshToken, responseDto.getRefreshToken());
 
             verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(userRepository).findByUsername("danik");

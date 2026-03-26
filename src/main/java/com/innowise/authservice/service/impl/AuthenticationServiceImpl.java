@@ -150,9 +150,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         List<Token> validTokens = tokenRepository.findAllAccessTokensByUserId(userId);
 
         if(!validTokens.isEmpty()){
-            validTokens.forEach(t ->{
-                t.setLoggedOut(true);
-            });
+            validTokens.forEach(t -> t.setLoggedOut(true));
         }
 
         tokenRepository.saveAll(validTokens);
