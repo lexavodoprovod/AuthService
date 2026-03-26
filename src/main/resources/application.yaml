@@ -1,6 +1,33 @@
 spring:
   application:
     name: AuthService
+  liquibase:
+    enabled: true
+  datasource:
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  security:
+    jwt:
+      secret_key: ${SECRET_KEY}
+      access_token_expiration: ${ACCESS_TOKEN_EXPIRATION}
+      refresh_token_expiration: ${REFRESH_TOKEN_EXPIRATION}
+
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
 
 server:
   port: 8080
