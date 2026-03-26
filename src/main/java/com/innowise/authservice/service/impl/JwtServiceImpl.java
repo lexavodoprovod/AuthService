@@ -101,7 +101,7 @@ public class JwtServiceImpl implements JwtService {
                 .claim("jti", UUID.randomUUID().toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiryTime))
-                .signWith(getSigningKey());
+                .signWith(getSigningKey(), Jwts.SIG.HS256);
         return builder.compact();
     }
 
