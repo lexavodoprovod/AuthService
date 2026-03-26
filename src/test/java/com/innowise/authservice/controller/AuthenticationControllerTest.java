@@ -8,6 +8,7 @@ import com.innowise.authservice.dto.UserDto;
 import com.innowise.authservice.entity.Role;
 import com.innowise.authservice.entity.Token;
 import com.innowise.authservice.entity.User;
+import com.innowise.authservice.exception.UserServiceException;
 import com.innowise.authservice.repository.TokenRepository;
 import com.innowise.authservice.repository.UserRepository;
 import com.innowise.authservice.service.JwtService;
@@ -120,6 +121,38 @@ class AuthenticationControllerTest extends BaseIT {
                             .accept(org.springframework.http.MediaType.APPLICATION_JSON))
                     .andExpect(status().isConflict());
         }
+
+        @Test
+        @DisplayName("POST /auth/registration should return 400 when request body is empty or invalid")
+        void shouldReturnBadRequest_WhenDtoIsInvalid() throws Exception {
+            mockMvc.perform(MockMvcRequestBuilders
+                            .post("/auth/registration")
+                            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                            .content(""))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("POST /auth/registration should return 500 when UserClient (Feign) fails")
+        void shouldReturnInternalServerError_WhenFeignClientFails() throws Exception {
+            RegistrationDto registrationDto = RegistrationDto.builder()
+                    .username("feign_fail_user")
+                    .password("pass")
+                    .build();
+
+            when(userClient.addUser(any(UserDto.class)))
+                    .thenThrow(new UserServiceException());
+
+            mockMvc.perform(MockMvcRequestBuilders
+                            .post("/auth/registration")
+                            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(registrationDto)))
+                    .andExpect(status().isServiceUnavailable());
+
+            Optional<User> savedUser = userRepository.findByUsername("feign_fail_user");
+            assertFalse(savedUser.isPresent());
+        }
+
     }
 
     @Nested
@@ -146,9 +179,10 @@ class AuthenticationControllerTest extends BaseIT {
             mockMvc.perform(MockMvcRequestBuilders
                             .post("/auth/login")
                             .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(loginDto))
-                            .accept(org.springframework.http.MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                            .content(objectMapper.writeValueAsString(loginDto)))
+                    .andExpect(status().isOk())
+                    .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.accessToken").exists())
+                    .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$.refreshToken").exists());
 
 
             List<Token> tokens = tokenRepository.findAllAccessTokensByUserId(user.getId());
@@ -190,6 +224,16 @@ class AuthenticationControllerTest extends BaseIT {
                             .content(objectMapper.writeValueAsString(loginDto))
                             .accept(org.springframework.http.MediaType.APPLICATION_JSON))
 
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("POST /auth/login - Failure: should return 400 if loginDto is null")
+        void login_NullDto() throws Exception {
+            mockMvc.perform(MockMvcRequestBuilders
+                            .post("/auth/login")
+                            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                            .content("{}"))
                     .andExpect(status().isUnauthorized());
         }
     }
@@ -265,6 +309,43 @@ class AuthenticationControllerTest extends BaseIT {
                     .post("/auth/refresh_token"))
                     .andExpect(status().isUnauthorized());
         }
+
+        @Test
+        @DisplayName("POST /auth/refresh_token - Failure: should return 401 when Bearer prefix is missing")
+        void refreshToken_MissingBearerPrefix() throws Exception {
+            mockMvc.perform(MockMvcRequestBuilders
+                            .post("/auth/refresh_token")
+                            .header("Authorization", "JustSomeRandomTokenString"))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("POST /auth/refresh_token - Success: should save new access token to database")
+        void refreshToken_VerifyNewTokenSaved() throws Exception {
+            User user = User.builder().id(101L).username("rotate_user").password("123").role(Role.USER).build();
+            userRepository.save(user);
+            String oldRefreshToken = jwtService.generateRefreshToken(user);
+
+            Token tokenEntity = new Token();
+            tokenEntity.setRefreshToken(oldRefreshToken);
+            tokenEntity.setAccessToken(jwtService.generateAccessToken(user));
+            tokenEntity.setUser(user);
+            tokenEntity.setLoggedOut(false);
+            tokenRepository.save(tokenEntity);
+
+            var response = mockMvc.perform(MockMvcRequestBuilders
+                            .post("/auth/refresh_token")
+                            .header("Authorization", "Bearer " + oldRefreshToken))
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse().getContentAsString();
+
+            String newAccessToken = com.jayway.jsonpath.JsonPath.read(response, "$.accessToken");
+
+            Optional<Token> newTokenInDb = tokenRepository.findTokenByAccessToken(newAccessToken);
+            assertTrue(newTokenInDb.isPresent(), "New access token must be persisted in DB");
+            assertFalse(newTokenInDb.get().isLoggedOut(), "New token must be active");
+        }
+
     }
 
 

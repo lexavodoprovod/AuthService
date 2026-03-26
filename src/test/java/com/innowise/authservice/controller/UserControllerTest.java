@@ -6,6 +6,7 @@ import com.innowise.authservice.dto.PaymentCardDto;
 import com.innowise.authservice.dto.UserDto;
 import com.innowise.authservice.entity.Role;
 import com.innowise.authservice.entity.User;
+import com.innowise.authservice.exception.UserServiceException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -22,8 +24,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class UserControllerTest extends BaseIT{
 
@@ -75,6 +76,50 @@ class UserControllerTest extends BaseIT{
                     .andExpect(status().isUnauthorized());
 
             verifyNoInteractions(userClient);
+        }
+
+        @Test
+        @DisplayName("GET /user/profile - Failure: should return 500 when UserClient fails")
+        void shouldReturnInternalServerError_WhenUserClientFails() throws Exception {
+            Long userId = 1L;
+            User mockUser = User.builder().id(userId).username("nikita_dev").role(Role.USER).build();
+
+            when(userClient.getUserById(userId))
+                    .thenThrow(new UserServiceException());
+
+            mockMvc.perform(get("/user/profile")
+                            .with(user(mockUser)))
+                    .andExpect(status().isServiceUnavailable());
+
+            verify(userClient, times(1)).getUserById(userId);
+        }
+
+        @Test
+        @DisplayName("GET /user/profile - Success: should handle empty response from client")
+        void shouldHandleNullProfileFromClient() throws Exception {
+            Long userId = 1L;
+            User mockUser = User.builder().id(userId).username("nikita_dev").build();
+
+            when(userClient.getUserById(userId)).thenReturn(null);
+
+            mockMvc.perform(get("/user/profile")
+                            .with(user(mockUser)))
+                    .andExpect(status().isOk())
+                    .andExpect(content().string(""));
+        }
+
+        @Test
+        @DisplayName("GET /user/profile - Success: Admin should also see his profile")
+        void shouldReturnProfileForAdmin() throws Exception {
+            User adminUser = User.builder().id(99L).username("admin").role(Role.ADMIN).build();
+            UserDto adminDto = UserDto.builder().id(99L).name("Admin").build();
+
+            when(userClient.getUserById(99L)).thenReturn(adminDto);
+
+            mockMvc.perform(get("/user/profile")
+                            .with(user(adminUser)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.name").value("Admin"));
         }
     }
 
@@ -131,6 +176,43 @@ class UserControllerTest extends BaseIT{
                     .andExpect(status().isUnauthorized());
 
             verifyNoInteractions(userClient);
+        }
+
+        @Test
+        @DisplayName("GET /user/payment-cards - Failure: should return 500 when UserClient fails")
+        void shouldReturn500_WhenUserClientFails() throws Exception {
+            Long userId = 1L;
+            User mockUser = User.builder().id(userId).username("card_holder").build();
+
+            when(userClient.getAllPaymentCardsByUserId(userId))
+                    .thenThrow(new UserServiceException());
+
+            mockMvc.perform(get("/user/payment-cards")
+                            .with(user(mockUser)))
+                    .andExpect(status().isServiceUnavailable());
+
+            verify(userClient, times(1)).getAllPaymentCardsByUserId(userId);
+        }
+
+        @Test
+        @DisplayName("GET /user/payment-cards - Success: should verify full DTO fields")
+        void shouldVerifyFullDtoContent() throws Exception {
+            Long userId = 1L;
+            User mockUser = User.builder().id(userId).username("tester").build();
+
+            PaymentCardDto card = PaymentCardDto.builder()
+                    .id(50L)
+                    .number("4444")
+                    .expirationDate(LocalDate.of(2028, 12, 31))
+                    .build();
+
+            when(userClient.getAllPaymentCardsByUserId(userId)).thenReturn(List.of(card));
+
+            mockMvc.perform(get("/user/payment-cards")
+                            .with(user(mockUser)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$[0].expirationDate").exists());
+
         }
     }
 
@@ -189,6 +271,64 @@ class UserControllerTest extends BaseIT{
                     .andExpect(status().isUnauthorized());
 
             verifyNoInteractions(userClient);
+        }
+
+        @Test
+        @DisplayName("PUT /user/update - Failure: should return 500 when UserClient fails")
+        void shouldReturnInternalServerError_WhenUserClientFails() throws Exception {
+            Long userId = 1L;
+            User mockUser = User.builder().id(userId).username("nikita_dev").build();
+            UserDto requestDto = UserDto.builder().name("Fail").build();
+
+            when(userClient.updateUser(eq(userId), any(UserDto.class)))
+                    .thenThrow(new UserServiceException());
+
+            mockMvc.perform(put("/user/update")
+                            .with(user(mockUser))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(requestDto)))
+                    .andExpect(status().isServiceUnavailable());
+
+            verify(userClient, times(1)).updateUser(eq(userId), any(UserDto.class));
+        }
+
+        @Test
+        @DisplayName("PUT /user/update - Failure: should handle empty request body")
+        void shouldReturnBadRequest_WhenBodyIsEmpty() throws Exception {
+            Long userId = 1L;
+            User mockUser = User.builder().id(userId).username("nikita_dev").build();
+
+            mockMvc.perform(put("/user/update")
+                            .with(user(mockUser))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(""))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("PUT /user/update - Success: should update birthDate using LocalDate")
+        void shouldUpdateBirthDateSuccessfully() throws Exception {
+            Long userId = 1L;
+            User mockUser = User.builder().id(userId).username("nikita_dev").build();
+            LocalDate birthDate = LocalDate.of(2008, 6, 27);
+
+            UserDto requestDto = UserDto.builder()
+                    .birthDate(birthDate)
+                    .build();
+
+            UserDto responseDto = UserDto.builder()
+                    .id(userId)
+                    .birthDate(birthDate)
+                    .build();
+
+            when(userClient.updateUser(eq(userId), any(UserDto.class))).thenReturn(responseDto);
+
+            mockMvc.perform(put("/user/update")
+                            .with(user(mockUser))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(requestDto)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.birthDate").exists());
         }
     }
 
