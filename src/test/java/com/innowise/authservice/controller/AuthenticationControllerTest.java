@@ -58,8 +58,8 @@ class AuthenticationControllerTest extends BaseIT {
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
-        tokenRepository.deleteAll();
+        tokenRepository.deleteAllInBatch();
+        userRepository.deleteAllInBatch();
     }
 
     @Nested
