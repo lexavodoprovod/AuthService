@@ -2,6 +2,7 @@ package com.innowise.authservice.exception;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
+import io.jsonwebtoken.JwtException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -84,6 +85,11 @@ public class GlobalExceptionHandler {
                 .timestamp(LocalDateTime.now())
                 .build();
         return  new ResponseEntity<>(exception, httpError);
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<String> handleJwtException(JwtException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT processing failed: " + e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
