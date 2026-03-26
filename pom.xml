@@ -200,18 +200,6 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/dto/**</exclude>
-                                <exclude>**/client/**</exclude>
-                                <exclude>**/config/**</exclude>
-                                <exclude>**/entity/**</exclude>
-                                <exclude>**/exception/**</exclude>
-                                <exclude>**/handler/**</exclude>
-                                <exclude>**/constant/**</exclude>
-                                <exclude>**/AuthServiceApplication.class</exclude>
-                            </excludes>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

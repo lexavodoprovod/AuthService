@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -106,6 +107,57 @@ class JwtFilterTest {
         jwtFilter.doFilterInternal(request, response, filterChain);
 
         assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verify(filterChain).doFilter(request, response);
+    }
+
+    @Test
+    @DisplayName("Should skip authentication when username is null")
+    void shouldNotAuthenticate_WhenUsernameIsNull() throws ServletException, IOException {
+        String token = "token.without.username";
+        when(request.getHeader(JWT_HEADER_NAME)).thenReturn(JWT_HEADER_PREFIX + token);
+        when(jwtService.extractUsername(token)).thenReturn(null);
+
+        jwtFilter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        assertNull(SecurityContextHolder.getContext().getAuthentication());
+        verifyNoInteractions(userService);
+    }
+
+    @Test
+    @DisplayName("Should skip authentication when user is already authenticated")
+    void shouldNotAuthenticate_WhenUserAlreadyAuthenticated() throws ServletException, IOException {
+        String token = "valid.token";
+        String username = "test_user";
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken("existing_user", null, null)
+        );
+
+        when(request.getHeader(JWT_HEADER_NAME)).thenReturn(JWT_HEADER_PREFIX + token);
+        when(jwtService.extractUsername(token)).thenReturn(username);
+
+        jwtFilter.doFilterInternal(request, response, filterChain);
+
+        verify(filterChain).doFilter(request, response);
+        verifyNoInteractions(userService);
+    }
+
+    @Test
+    @DisplayName("Should handle case when token is valid but authorities are empty")
+    void shouldAuthenticate_WithEmptyAuthorities() throws ServletException, IOException {
+        String token = "valid.token";
+        String username = "user";
+        UserDetails userDetails = mock(UserDetails.class);
+
+        when(request.getHeader(JWT_HEADER_NAME)).thenReturn(JWT_HEADER_PREFIX + token);
+        when(jwtService.extractUsername(token)).thenReturn(username);
+        when(userService.loadUserByUsername(username)).thenReturn(userDetails);
+        when(jwtService.isValidAccessToken(token, userDetails)).thenReturn(true);
+        when(userDetails.getAuthorities()).thenReturn(java.util.Collections.emptyList());
+
+        jwtFilter.doFilterInternal(request, response, filterChain);
+
+        assertNotNull(SecurityContextHolder.getContext().getAuthentication());
         verify(filterChain).doFilter(request, response);
     }
 }

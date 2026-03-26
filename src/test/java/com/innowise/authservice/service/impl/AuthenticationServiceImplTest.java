@@ -90,6 +90,8 @@ class AuthenticationServiceImplTest {
             verify(passwordEncoder).encode("pass123");
         }
 
+
+
         @Test
         @DisplayName("Should throw NullParameterException when dto is null")
         void shouldThrowExceptionWhenDtoIsNull() {
@@ -105,6 +107,31 @@ class AuthenticationServiceImplTest {
             assertThrows(ExistUserException.class, () -> authenticationService.register(regDto));
             verify(userRepository, never()).save(any());
             verify(userClient, never()).addUser(any());
+        }
+
+        @Test
+        @DisplayName("Should correctly map all fields from RegistrationDto to UserDto")
+        void shouldMapAllFieldsCorrectly() {
+            RegistrationDto regDto = RegistrationDto.builder()
+                    .username("danik")
+                    .password("123")
+                    .name("Nikita")
+                    .surname("Hololeenko")
+                    .email("danik@mail.com")
+                    .build();
+
+            when(userRepository.existsByUsername(any())).thenReturn(false);
+            when(userClient.addUser(any(UserDto.class))).thenReturn(UserDto.builder().id(1L).build());
+
+            authenticationService.register(regDto);
+
+            org.mockito.ArgumentCaptor<UserDto> captor = org.mockito.ArgumentCaptor.forClass(UserDto.class);
+            verify(userClient).addUser(captor.capture());
+
+            UserDto captured = captor.getValue();
+            assertEquals("Nikita", captured.getName());
+            assertEquals("Hololeenko", captured.getSurname());
+            assertEquals("danik@mail.com", captured.getEmail());
         }
     }
 
@@ -146,6 +173,31 @@ class AuthenticationServiceImplTest {
 
             verify(tokenRepository).findAllAccessTokensByUserId(user.getId());
             verify(tokenRepository).save(any(Token.class));
+        }
+
+        @Test
+        @DisplayName("Should throw NullParameterException when loginDto is null")
+        void shouldThrowExceptionWhenLoginDtoIsNull() {
+            assertThrows(NullParameterException.class, () -> authenticationService.authenticate(null));
+        }
+
+
+
+        @Test
+        @DisplayName("Should not fail when revoking tokens if user has no previous tokens")
+        void shouldNotFailWhenUserHasNoTokens() {
+            LoginDto loginDto = new LoginDto("danik", "password");
+            User user = User.builder().id(1L).username("danik").build();
+
+            when(userRepository.findByUsername("danik")).thenReturn(Optional.of(user));
+            when(tokenRepository.findAllAccessTokensByUserId(1L)).thenReturn(java.util.Collections.emptyList());
+            when(jwtService.generateAccessToken(user)).thenReturn("at");
+            when(jwtService.generateRefreshToken(user)).thenReturn("rt");
+
+            authenticationService.authenticate(loginDto);
+
+            verify(tokenRepository).saveAll(java.util.Collections.emptyList());
+            verify(tokenRepository).save(any(Token.class)); // Новый токен всё равно должен сохраниться
         }
 
         @Test
@@ -203,6 +255,20 @@ class AuthenticationServiceImplTest {
 
             verify(tokenRepository).findAllAccessTokensByUserId(user.getId());
             verify(tokenRepository).save(any(Token.class));
+        }
+
+        @Test
+        @DisplayName("Should throw UsernameNotFoundException during refresh if user disappears from DB")
+        void shouldThrowExceptionWhenUserNotFoundDuringRefresh() {
+            String token = "valid_token";
+            String username = "ghost";
+
+            when(request.getHeader(JWT_HEADER_NAME)).thenReturn(JWT_HEADER_PREFIX + token);
+            when(jwtService.extractUsername(token)).thenReturn(username);
+            when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+            assertThrows(org.springframework.security.core.userdetails.UsernameNotFoundException.class,
+                    () -> authenticationService.refreshToken(request, response));
         }
 
         @Test

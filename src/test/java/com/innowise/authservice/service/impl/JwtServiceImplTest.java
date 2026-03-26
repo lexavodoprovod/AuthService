@@ -158,6 +158,22 @@ class JwtServiceImplTest {
             assertTrue(refreshExpiration.after(accessExpiration),
                     "Refresh token must expire later than access token");
         }
+
+        @Test
+        @DisplayName("Should return true when refresh token is valid and exists in DB")
+        void isValidRefreshToken_ShouldReturnTrue_WhenValid() {
+            User user = createTestUser(1L, "danik", Role.USER);
+            String refreshToken = jwtService.generateRefreshToken(user);
+
+            Token tokenEntity = new Token();
+            tokenEntity.setLoggedOut(false);
+
+            when(tokenRepository.findTokenByRefreshToken(refreshToken)).thenReturn(Optional.of(tokenEntity));
+
+            boolean isValid = jwtService.isValidRefreshToken(refreshToken, user);
+
+            assertTrue(isValid);
+        }
     }
 
     @Nested
@@ -205,6 +221,19 @@ class JwtServiceImplTest {
 
             assertNotNull(extractedUsername);
             assertEquals(expectedUsername, extractedUsername, "The extracted username should match the user's username");
+        }
+
+        @Test
+        @DisplayName("Should handle missing custom claim (role) gracefully")
+        void extractUserRole_ShouldReturnNull_WhenClaimIsMissing() {
+            String tokenWithoutRole = Jwts.builder()
+                    .subject("1")
+                    .claim("username", "test")
+                    .signWith(Keys.hmacShaKeyFor(Decoders.BASE64.decode(SECRET)), Jwts.SIG.HS256)
+                    .compact();
+
+            String role = jwtService.extractUserRole(tokenWithoutRole);
+            assertNull(role);
         }
 
         @Test
@@ -294,6 +323,19 @@ class JwtServiceImplTest {
             boolean isValid = jwtService.isValidAccessToken(token, user);
 
             assertFalse(isValid, "Should be invalid if token is not tracked in DB");
+        }
+
+        @Test
+        @DisplayName("Should return false when token is expired")
+        void isValidAccessToken_ShouldReturnFalse_WhenExpired() {
+
+            ReflectionTestUtils.setField(jwtService, "accessTokenExpiration", -60000L);
+            String expiredToken = jwtService.generateAccessToken(testUser);
+
+            ReflectionTestUtils.setField(jwtService, "accessTokenExpiration", 3600000L);
+
+
+            assertThrows(RuntimeException.class, () -> jwtService.isValidAccessToken(expiredToken, testUser));
         }
     }
 
