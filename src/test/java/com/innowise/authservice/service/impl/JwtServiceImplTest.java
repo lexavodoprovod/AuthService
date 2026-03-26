@@ -33,7 +33,7 @@ class JwtServiceImplTest {
     @InjectMocks
     private JwtServiceImpl jwtService;
 
-    private static final String SECRET = "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970";
+    private static final String SECRET = "MkY0R0hKS0xNOM09QUVTVFVWV1hZWkFCQ0RFRkdISktMTU5PUFFTVFVWV1hZWkFCQ0RFRkdISktMTU5PUFFTVFVWV1hZ";
     private User testUser;
 
     @BeforeEach

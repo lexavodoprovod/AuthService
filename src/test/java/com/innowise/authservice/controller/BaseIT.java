@@ -31,7 +31,7 @@ public abstract class BaseIT {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
-        registry.add("SECRET_KEY", () -> "xu9+v975k/kqU7wyl1Bp3nQUd8/ntAnWtH96fztyWws=");
+        registry.add("SECRET_KEY", () -> "R0hKS0xNT1BRVFNUVVZXWFlaQUJDREVGR0hKS0xNT1BRVFNUVVZXWFlaQUJDREVGR0hKS0xNT1BRVFNUVVZXWA==");
         registry.add("ACCESS_TOKEN_EXPIRATION", () -> "36000000");
         registry.add("REFRESH_TOKEN_EXPIRATION", () -> "25204000");
 
