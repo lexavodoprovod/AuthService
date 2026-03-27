@@ -84,11 +84,11 @@ public class AdminController {
 
     @PatchMapping("/cards/{id}/activate")
     public ResponseEntity<Void> activateCard(@PathVariable Long id) {
-        return userClient.activateUser(id);
+        return paymentCardClient.activatePaymentCard(id);
     }
 
     @PatchMapping("/cards/{id}/deactivate")
     public ResponseEntity<Void> deactivateCard(@PathVariable Long id) {
-        return userClient.deactivateUser(id);
+        return paymentCardClient.deactivatePaymentCard(id);
     }
 }
