@@ -13,6 +13,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import static com.innowise.authservice.constant.TokenInfo.*;
 
+/**
+ * REST controller for authentication operations.
+ * Handles user registration, login, token refreshing, and token validation.
+ */
 @RestController
 @RequestMapping(value = "/auth", produces = "application/json")
 @RequiredArgsConstructor
@@ -20,17 +24,36 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final JwtService jwtService;
 
+    /**
+     * Registers a new user in the system.
+     *
+     * @param registrationDto the user data for registration.
+     * @return {@link ResponseEntity} with a success message containing the new user ID.
+     */
     @PostMapping("/registration")
     public ResponseEntity<String> register(@RequestBody RegistrationDto registrationDto) {
         Long id = authenticationService.register(registrationDto);
         return ResponseEntity.ok().body("User registered successfully with id: %s".formatted(id));
     }
 
+    /**
+     * Authenticates a user and issues JWT tokens.
+     *
+     * @param loginDto the user's credentials (username and password).
+     * @return {@link ResponseEntity} containing access and refresh tokens.
+     */
     @PostMapping("/login")
     public ResponseEntity<AuthenticationResponseDto> login(@RequestBody LoginDto loginDto) {
         return ResponseEntity.ok(authenticationService.authenticate(loginDto));
     }
 
+    /**
+     * Refreshes an expired access token using a valid refresh token.
+     *
+     * @param request  the HTTP request containing the refresh token in the headers.
+     * @param response the HTTP response.
+     * @return {@link ResponseEntity} with a new pair of JWT tokens.
+     */
     @PostMapping("/refresh_token")
     public ResponseEntity<AuthenticationResponseDto> refreshToken(
             HttpServletRequest request,
@@ -39,6 +62,13 @@ public class AuthenticationController {
         return authenticationService.refreshToken(request, response);
     }
 
+    /**
+     * Validates a JWT token for the API Gateway.
+     * Checks if the token is properly signed, not expired, and not revoked (logged out).
+     *
+     * @param authHeader the Authorization header containing the JWT token with Bearer prefix.
+     * @return 200 OK if the token is valid, or 401 Unauthorized if validation fails.
+     */
     @GetMapping("/validate")
     public ResponseEntity<Void> validate(
             @RequestHeader(JWT_HEADER_NAME)
