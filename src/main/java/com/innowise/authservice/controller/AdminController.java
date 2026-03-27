@@ -54,7 +54,7 @@ public class AdminController {
         return userClient.activateUser(id);
     }
 
-    @PatchMapping("/users/{id}/deactivate")
+    @DeleteMapping("/users/{id}")
     public ResponseEntity<Void> deactivateUser(@PathVariable Long id) {
         return userClient.deactivateUser(id);
     }
@@ -87,7 +87,7 @@ public class AdminController {
         return paymentCardClient.activatePaymentCard(id);
     }
 
-    @PatchMapping("/cards/{id}/deactivate")
+    @DeleteMapping("/cards/{id}")
     public ResponseEntity<Void> deactivateCard(@PathVariable Long id) {
         return paymentCardClient.deactivatePaymentCard(id);
     }

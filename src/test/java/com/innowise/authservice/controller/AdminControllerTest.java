@@ -305,7 +305,7 @@ class AdminControllerTest extends BaseIT{
             when(userClient.deactivateUser(targetUserId))
                     .thenReturn(ResponseEntity.noContent().build());
 
-            mockMvc.perform(patch("/admin/users/{id}/deactivate", targetUserId)
+            mockMvc.perform(delete("/admin/users/{id}", targetUserId)
                             .with(user(admin)))
                     .andExpect(status().isNoContent());
 
@@ -317,7 +317,7 @@ class AdminControllerTest extends BaseIT{
         void shouldReturn403ForRegularUser() throws Exception {
             User regularUser = User.builder().role(Role.USER).build();
 
-            mockMvc.perform(patch("/admin/users/25/deactivate")
+            mockMvc.perform(delete("/admin/users/25")
                             .with(user(regularUser)))
                     .andExpect(status().isForbidden());
 
@@ -473,14 +473,14 @@ class AdminControllerTest extends BaseIT{
                     .role(Role.ADMIN)
                     .build();
 
-            when(userClient.activateUser(cardId))
+            when(paymentCardClient.activatePaymentCard(cardId))
                     .thenReturn(ResponseEntity.ok().build());
 
             mockMvc.perform(patch("/admin/cards/{id}/activate", cardId)
                             .with(user(admin)))
                     .andExpect(status().isOk());
 
-            verify(userClient, times(1)).activateUser(cardId);
+            verify(paymentCardClient, times(1)).activatePaymentCard(cardId);
         }
 
         @Test
@@ -508,14 +508,14 @@ class AdminControllerTest extends BaseIT{
                     .role(Role.ADMIN)
                     .build();
 
-            when(userClient.deactivateUser(cardId))
+            when(paymentCardClient.deactivatePaymentCard(cardId))
                     .thenReturn(ResponseEntity.noContent().build());
 
-            mockMvc.perform(patch("/admin/cards/{id}/deactivate", cardId)
+            mockMvc.perform(delete("/admin/cards/{id}", cardId)
                             .with(user(admin)))
                     .andExpect(status().isNoContent());
 
-            verify(userClient, times(1)).deactivateUser(cardId);
+            verify(paymentCardClient, times(1)).deactivatePaymentCard(cardId);
         }
 
         @Test
@@ -523,7 +523,7 @@ class AdminControllerTest extends BaseIT{
         void shouldReturn403ForRegularUser() throws Exception {
             User regularUser = User.builder().role(Role.USER).build();
 
-            mockMvc.perform(patch("/admin/cards/123/deactivate")
+            mockMvc.perform(delete("/admin/cards/123")
                             .with(user(regularUser)))
                     .andExpect(status().isForbidden());
 
