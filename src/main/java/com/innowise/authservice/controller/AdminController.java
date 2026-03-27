@@ -2,8 +2,7 @@ package com.innowise.authservice.controller;
 
 import com.innowise.authservice.client.PaymentCardClient;
 import com.innowise.authservice.client.UserClient;
-import com.innowise.authservice.dto.PaymentCardDto;
-import com.innowise.authservice.dto.UserDto;
+import com.innowise.authservice.dto.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -91,4 +90,66 @@ public class AdminController {
     public ResponseEntity<Void> deactivateCard(@PathVariable Long id) {
         return paymentCardClient.deactivatePaymentCard(id);
     }
+
+    @PostMapping("/orders")
+    public ResponseEntity<OrderDto> addOrder(@RequestBody OrderDto orderDto) {
+        return ResponseEntity.ok().body(new OrderDto());
+    }
+
+    @GetMapping("/orders")
+    public ResponseEntity<Page<OrderDto>> getAllOrders() {
+        return ResponseEntity.ok().body(Page.empty());
+    }
+
+    @PutMapping("/orders/{id}")
+    public ResponseEntity<OrderDto> updateOrder(@PathVariable Long id, @RequestBody OrderDto orderDto) {
+        return ResponseEntity.ok().body(new OrderDto());
+    }
+
+    @DeleteMapping("/orders/{id}")
+    public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/items")
+    public ResponseEntity<ItemDto> addItem(@RequestBody ItemDto itemDto) {
+        return ResponseEntity.ok().body(new ItemDto());
+    }
+
+    @GetMapping("/items")
+    public ResponseEntity<Page<ItemDto>> getAllItems() {
+        return ResponseEntity.ok().body(Page.empty());
+    }
+
+    @PutMapping("/items/{id}")
+    public ResponseEntity<ItemDto> updateItem(@PathVariable Long id, @RequestBody ItemDto itemDto) {
+        return ResponseEntity.ok().body(new ItemDto());
+    }
+
+    @DeleteMapping("/items/{id}")
+    public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/payments")
+    public ResponseEntity<PaymentDto> addPayment(@RequestBody PaymentDto paymentDto) {
+        return ResponseEntity.ok().body(new PaymentDto());
+    }
+
+    @GetMapping("/payments")
+    public ResponseEntity<Page<PaymentDto>> getAllPayments() {
+        return ResponseEntity.ok().body(Page.empty());
+    }
+
+    @PutMapping("/payments/{id}")
+    public ResponseEntity<PaymentDto> updatePayment(@PathVariable Long id, @RequestBody PaymentDto paymentDto) {
+        return ResponseEntity.ok().body(new PaymentDto());
+    }
+
+    @DeleteMapping("/payments/{id}")
+    public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
+        return ResponseEntity.noContent().build();
+    }
+
+
 }
