@@ -292,11 +292,6 @@ class UserControllerTest extends BaseIT{
 
             userRepository.save(mockUser);
 
-            UserDto expectedDto = UserDto.builder()
-                    .id(userId)
-                    .name("Nikita")
-                    .email("nikita@example.com")
-                    .build();
 
             String accessToken = jwtService.generateAccessToken(mockUser);
             String refreshToken = jwtService.generateRefreshToken(mockUser);
@@ -341,12 +336,6 @@ class UserControllerTest extends BaseIT{
 
             userRepository.save(mockUser);
 
-            UserDto expectedDto = UserDto.builder()
-                    .id(userId)
-                    .name("Nikita")
-                    .email("nikita@example.com")
-                    .build();
-
             String accessToken = jwtService.generateAccessToken(mockUser);
             String refreshToken = jwtService.generateRefreshToken(mockUser);
 
@@ -382,12 +371,6 @@ class UserControllerTest extends BaseIT{
                     .build();
 
             userRepository.save(mockUser);
-
-            UserDto expectedDto = UserDto.builder()
-                    .id(userId)
-                    .name("Nikita")
-                    .email("nikita@example.com")
-                    .build();
 
             String accessToken = jwtService.generateAccessToken(mockUser);
             String refreshToken = jwtService.generateRefreshToken(mockUser);
