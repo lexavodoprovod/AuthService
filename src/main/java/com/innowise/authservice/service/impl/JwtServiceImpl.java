@@ -64,6 +64,20 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
+    public boolean isValidTokenForGateway(String token) {
+        try {
+            extractAllClaims(token);
+
+            return tokenRepository.findTokenByAccessToken(token)
+                    .map(t -> !t.isLoggedOut())
+                    .orElse(false);
+
+        }catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Override
     public boolean isValidAccessToken(String token, UserDetails user) {
 
        String username = extractUsername(token);

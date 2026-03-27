@@ -21,8 +21,8 @@ import java.util.Date;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class JwtServiceImplTest {
@@ -266,6 +266,52 @@ class JwtServiceImplTest {
     @Nested
     @DisplayName("Is valid access token tests")
     class IsValidAccessTokenTests {
+
+        @Test
+        @DisplayName("Should return true when token is valid and not logged out")
+        void isValidTokenForApiGateway_Success() {
+
+            User userEntity = createTestUser(1L, "nikita", Role.USER);
+            String token = jwtService.generateAccessToken(userEntity);
+
+            Token tokenEntity = new Token();
+            tokenEntity.setLoggedOut(false);
+
+            when(tokenRepository.findTokenByAccessToken(anyString()))
+                    .thenReturn(Optional.of(tokenEntity));
+
+            boolean result = jwtService.isValidTokenForGateway(token);
+
+            assertTrue(result);
+        }
+
+        @Test
+        @DisplayName("Should return false when token is marked as logged out in DB")
+        void isValidTokenForApiGateway_LoggedOut() {
+            User userEntity = createTestUser(1L, "nikita", Role.USER);
+            String token = jwtService.generateAccessToken(userEntity);
+            Token tokenEntity = new Token();
+            tokenEntity.setLoggedOut(true);
+
+            when(tokenRepository.findTokenByAccessToken(anyString()))
+                    .thenReturn(Optional.of(tokenEntity));
+
+            boolean result = jwtService.isValidTokenForGateway(token);
+
+            assertFalse(result);
+        }
+
+        @Test
+        @DisplayName("Should return false when extractAllClaims throws exception (expired or malformed)")
+        void isValidTokenForApiGateway_Exception() {
+            String invalidToken = "not-a-token";
+
+            boolean result = jwtService.isValidTokenForGateway(invalidToken);
+
+            assertFalse(result);
+            verifyNoInteractions(tokenRepository);
+        }
+
 
         @Test
         @DisplayName("Should return true when token is valid, not expired and not logged out")

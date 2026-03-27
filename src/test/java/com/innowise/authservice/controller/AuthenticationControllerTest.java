@@ -22,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import static com.innowise.authservice.constant.TokenInfo.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import java.util.List;
 import java.util.Optional;
@@ -346,6 +348,78 @@ class AuthenticationControllerTest extends BaseIT {
             assertFalse(newTokenInDb.get().isLoggedOut(), "New token must be active");
         }
 
+    }
+
+    @Nested
+    @DisplayName("Validate token endpoint tests")
+    class ValidateTokenEndpoint {
+
+        @Test
+        @DisplayName("Should return 401 when Authorization header is missing")
+        void validate_MissingHeader_Returns401() throws Exception {
+            mockMvc.perform(get("/auth/validate"))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("Should return 401 when Authorization header does not start with Bearer")
+        void validate_InvalidHeaderFormat_Returns401() throws Exception {
+            mockMvc.perform(get("/auth/validate")
+                            .header(JWT_HEADER_NAME, "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("Should return 401 when JwtService returns false")
+        void validate_InvalidToken_Returns401() throws Exception {
+
+            User userEntity = User.builder()
+                    .id(1L)
+                    .username("user")
+                    .password("password")
+                    .role(Role.USER)
+                    .build();
+
+            String accessToken = jwtService.generateAccessToken(userEntity);
+            String bearerToken = JWT_HEADER_PREFIX + accessToken;
+
+            mockMvc.perform(get("/auth/validate")
+                            .header(JWT_HEADER_NAME, bearerToken))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        @Test
+        @DisplayName("Should return 200 when token is valid")
+        void validate_ValidToken_Returns200() throws Exception {
+
+            User userEntity = User.builder()
+                    .id(1L)
+                    .username("user")
+                    .role(Role.USER)
+                    .password("password")
+                    .build();
+
+            userRepository.save(userEntity);
+
+            String accessToken = jwtService.generateAccessToken(userEntity);
+            String refreshToken = jwtService.generateRefreshToken(userEntity);
+
+            Token tokenEntity = new Token();
+            tokenEntity.setAccessToken(accessToken);
+            tokenEntity.setRefreshToken(refreshToken);
+            tokenEntity.setLoggedOut(false);
+            tokenEntity.setUser(userEntity);
+
+            tokenRepository.save(tokenEntity);
+
+            String bearerToken = JWT_HEADER_PREFIX + accessToken;
+
+
+            mockMvc.perform(get("/auth/validate")
+                            .header(JWT_HEADER_NAME, bearerToken))
+                    .andExpect(status().isOk());
+
+        }
     }
 
 
