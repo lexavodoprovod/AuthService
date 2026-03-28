@@ -83,10 +83,8 @@ public class UserController {
     private Long extractIdFromHeader(String authHeader){
         
         String token = authHeader.substring(JWT_HEADER_PREFIX.length());
-        
-        Long userId = Long.parseLong(jwtService.extractUserId(token));
-        
-        return userId;
+
+        return Long.parseLong(jwtService.extractUserId(token));;
     }
 
 }
