@@ -36,7 +36,7 @@
         <sonar.organization>lexavodoprovod</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.xmlReportPaths>${project.build.directory}/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
-        <sonar.exclusions>**/PaymentAdminController.java, **/OrderAdminController.java, **/ItemAdminController.java, **/CustomAccessDeniedHandler.java, **/CustomAuthenticationEntryPointHandler.java</sonar.exclusions>
+        <sonar.exclusions>**/PaymentAdminController.java, **/ItemAdminController.java</sonar.exclusions>
 	</properties>
 
     <dependencyManagement>
@@ -192,10 +192,7 @@
                 <configuration>
                     <excludes>
                         <exclude>com/innowise/authservice/controller/PaymentAdminController.class</exclude>
-                        <exclude>com/innowise/authservice/controller/OrderAdminController.class</exclude>
                         <exclude>com/innowise/authservice/controller/ItemAdminController.class</exclude>
-                        <exclude>com/innowise/authservice/handler/CustomAccessDeniedHandler.class</exclude>
-                        <exclude>com/innowise/authservice/handler/CustomAuthenticationEntryPointHandler.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>
