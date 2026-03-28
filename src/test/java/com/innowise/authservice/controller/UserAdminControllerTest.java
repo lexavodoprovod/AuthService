@@ -1,7 +1,7 @@
 package com.innowise.authservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.innowise.authservice.client.PaymentCardClient;
+import com.innowise.authservice.client.CardClient;
 import com.innowise.authservice.client.UserClient;
 import com.innowise.authservice.dto.PaymentCardDto;
 import com.innowise.authservice.dto.UserDto;
@@ -40,7 +40,7 @@ class UserAdminControllerTest extends BaseIT{
     private UserClient userClient;
 
     @MockitoBean
-    private PaymentCardClient paymentCardClient;
+    private CardClient paymentCardClient;
 
 
     @Autowired

@@ -5,6 +5,7 @@ import com.innowise.authservice.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,7 +13,7 @@ import java.util.List;
 
 
 @RestController
-@RequestMapping(value = "/admin/users", produces = "application/json")
+@RequestMapping(value = "/admin/users", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class UserAdminController {
 

@@ -1,5 +1,6 @@
 package com.innowise.authservice.client;
 
+import com.innowise.authservice.client.fallback.UserClientFallBack;
 import com.innowise.authservice.dto.PaymentCardDto;
 import com.innowise.authservice.dto.UserDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -8,13 +9,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "user-client", url = "http://user-service-app:8080/users", fallback = UserClientFallBack.class)
-@Component
+@FeignClient(name = "user-client",
+            url = "${USER_SERVICE_URL}",
+            path = "/users",
+            fallback = UserClientFallBack.class)
 public interface UserClient {
 
     int PAGINATION_SIZE = 15;
@@ -41,7 +43,7 @@ public interface UserClient {
     @PatchMapping("/{id}/activate")
     ResponseEntity<Void> activateUser(@PathVariable Long id);
 
-    @PatchMapping("/{id}/deactivate")
+    @DeleteMapping("/{id}/deactivate")
     ResponseEntity<Void> deactivateUser(@PathVariable Long id);
 
 }

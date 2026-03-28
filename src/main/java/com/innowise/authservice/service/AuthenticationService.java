@@ -4,7 +4,6 @@ import com.innowise.authservice.dto.AuthenticationResponseDto;
 import com.innowise.authservice.dto.LoginDto;
 import com.innowise.authservice.dto.RegistrationDto;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -41,10 +40,9 @@ public interface AuthenticationService {
      * Revokes old tokens and issues a new pair to maintain security.
      *
      * @param request  the {@link HttpServletRequest} containing the Authorization header.
-     * @param response the {@link HttpServletResponse} (reserved for future use or cookie handling).
      * @return {@link ResponseEntity} containing the new {@link AuthenticationResponseDto}
      *         or an Unauthorized status if the token is invalid.
      */
-    ResponseEntity<AuthenticationResponseDto> refreshToken(HttpServletRequest request, HttpServletResponse response);
+    ResponseEntity<AuthenticationResponseDto> refreshToken(HttpServletRequest request);
 
 }

@@ -7,6 +7,7 @@ import com.innowise.authservice.dto.UserDto;
 import com.innowise.authservice.entity.Role;
 import com.innowise.authservice.entity.Token;
 import com.innowise.authservice.entity.User;
+import com.innowise.authservice.exception.FeignServiceException;
 import com.innowise.authservice.exception.UserServiceException;
 import com.innowise.authservice.repository.TokenRepository;
 import com.innowise.authservice.repository.UserRepository;

@@ -3,12 +3,12 @@ package com.innowise.authservice.config;
 import com.innowise.authservice.entity.Role;
 import com.innowise.authservice.filter.JwtFilter;
 import com.innowise.authservice.handler.CustomAccessDeniedHandler;
+import com.innowise.authservice.handler.CustomAuthenticationEntryPointHandler;
 import com.innowise.authservice.handler.CustomLogoutHandler;
 import com.innowise.authservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,7 +18,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
@@ -37,11 +36,13 @@ public class SecurityConfig {
     private static final String LOGOUT_URL = "/auth/logout";
 
 
-    private final JwtFilter jwtFIlter;
+    private final JwtFilter jwtFilter;
 
     private final UserService userService;
 
     private final CustomAccessDeniedHandler accessDeniedHandler;
+
+    private final CustomAuthenticationEntryPointHandler authenticationEntryPointHandler;
 
     private final CustomLogoutHandler customLogoutHandler;
 
@@ -59,10 +60,10 @@ public class SecurityConfig {
         }).userDetailsService(userService)
                 .exceptionHandling(e -> {
                     e.accessDeniedHandler(accessDeniedHandler);
-                    e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+                    e.authenticationEntryPoint(authenticationEntryPointHandler);
                 })
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
-                .addFilterBefore(jwtFIlter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(log -> {
                     log.logoutUrl(LOGOUT_URL);
                     log.addLogoutHandler(customLogoutHandler);

@@ -6,9 +6,9 @@ import com.innowise.authservice.dto.RegistrationDto;
 import com.innowise.authservice.service.AuthenticationService;
 import com.innowise.authservice.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import static com.innowise.authservice.constant.TokenInfo.*;
@@ -18,7 +18,7 @@ import static com.innowise.authservice.constant.TokenInfo.*;
  * Handles user registration, login, token refreshing, and token validation.
  */
 @RestController
-@RequestMapping(value = "/auth", produces = "application/json")
+@RequestMapping(value = "/auth", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
@@ -51,15 +51,13 @@ public class AuthenticationController {
      * Refreshes an expired access token using a valid refresh token.
      *
      * @param request  the HTTP request containing the refresh token in the headers.
-     * @param response the HTTP response.
      * @return {@link ResponseEntity} with a new pair of JWT tokens.
      */
     @PostMapping("/refresh_token")
     public ResponseEntity<AuthenticationResponseDto> refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response) {
+            HttpServletRequest request) {
 
-        return authenticationService.refreshToken(request, response);
+        return authenticationService.refreshToken(request);
     }
 
     /**

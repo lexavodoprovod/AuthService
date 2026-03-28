@@ -1,15 +1,19 @@
 package com.innowise.authservice.controller;
 
+import com.innowise.authservice.client.ItemClient;
 import com.innowise.authservice.dto.ItemDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/admin/items", produces = "application/json")
+@RequestMapping(value = "/admin/items",produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class ItemAdminController {
+
+    private final ItemClient itemClient;
 
     /**
      * Adds a new item to the catalog.
@@ -19,7 +23,10 @@ public class ItemAdminController {
      */
     @PostMapping
     public ResponseEntity<ItemDto> addItem(@RequestBody ItemDto itemDto) {
-        return ResponseEntity.ok().body(new ItemDto());
+
+        ItemDto itemDto1 = itemClient.addItem(itemDto);
+
+        return ResponseEntity.ok(itemDto1);
     }
 
     /**
@@ -29,7 +36,8 @@ public class ItemAdminController {
      */
     @GetMapping
     public ResponseEntity<Page<ItemDto>> getAllItems() {
-        return ResponseEntity.ok().body(Page.empty());
+        Page<ItemDto> itemDtoPage = itemClient.getAllItems();
+        return ResponseEntity.ok(itemDtoPage);
     }
 
     /**
@@ -41,7 +49,10 @@ public class ItemAdminController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<ItemDto> updateItem(@PathVariable Long id, @RequestBody ItemDto itemDto) {
-        return ResponseEntity.ok().body(new ItemDto());
+
+        ItemDto updatedItemDto = itemClient.updateItem(id, itemDto);
+
+        return ResponseEntity.ok(updatedItemDto);
     }
 
     /**
@@ -52,6 +63,6 @@ public class ItemAdminController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
-        return ResponseEntity.noContent().build();
+        return itemClient.deleteItem(id);
     }
 }

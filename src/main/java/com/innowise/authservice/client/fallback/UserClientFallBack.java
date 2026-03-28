@@ -1,5 +1,7 @@
-package com.innowise.authservice.client;
+package com.innowise.authservice.client.fallback;
 
+import com.innowise.authservice.client.CardClient;
+import com.innowise.authservice.client.UserClient;
 import com.innowise.authservice.dto.PaymentCardDto;
 import com.innowise.authservice.dto.UserDto;
 import com.innowise.authservice.exception.UserServiceException;
@@ -10,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 @Component
-public class UserClientFallBack implements UserClient, PaymentCardClient{
+public class UserClientFallBack implements UserClient, CardClient {
 
     @Override
     public UserDto getUserById(Long id) {

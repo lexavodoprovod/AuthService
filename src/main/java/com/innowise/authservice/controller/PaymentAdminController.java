@@ -1,24 +1,31 @@
 package com.innowise.authservice.controller;
 
+import com.innowise.authservice.client.PaymentClient;
 import com.innowise.authservice.dto.PaymentDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 @RestController
-@RequestMapping(value = "/admin/payments", produces = "application/json")
+@RequestMapping(value = "/admin/payments", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class PaymentAdminController {
+
+    private final PaymentClient paymentClient;
 
     /**
      * Records a new payment in the system.
      *
-     * @param paymentDto the payment data transfer object.
+     * @param paymentFromAdmin the payment data transfer object.
      * @return {@link ResponseEntity} containing the created {@link PaymentDto}.
      */
     @PostMapping
-    public ResponseEntity<PaymentDto> addPayment(@RequestBody PaymentDto paymentDto) {
-        return ResponseEntity.ok().body(new PaymentDto());
+    public ResponseEntity<PaymentDto> addPayment(@RequestBody PaymentDto paymentFromAdmin) {
+
+        PaymentDto paymentDto =  paymentClient.addPayment(paymentFromAdmin);
+
+        return ResponseEntity.ok(paymentDto);
     }
 
     /**
@@ -28,7 +35,10 @@ public class PaymentAdminController {
      */
     @GetMapping
     public ResponseEntity<Page<PaymentDto>> getAllPayments() {
-        return ResponseEntity.ok().body(Page.empty());
+
+        Page<PaymentDto> paymentDtoPage = paymentClient.getAllPayments();
+
+        return ResponseEntity.ok(paymentDtoPage);
     }
 
     /**
@@ -40,7 +50,8 @@ public class PaymentAdminController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<PaymentDto> updatePayment(@PathVariable Long id, @RequestBody PaymentDto paymentDto) {
-        return ResponseEntity.ok().body(new PaymentDto());
+        PaymentDto updatedPaymentDto = paymentClient.updatePayment(id, paymentDto);
+        return ResponseEntity.ok(updatedPaymentDto);
     }
 
     /**
@@ -51,6 +62,6 @@ public class PaymentAdminController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePayment(@PathVariable Long id) {
-        return ResponseEntity.noContent().build();
+        return paymentClient.deletePayment(id);
     }
 }

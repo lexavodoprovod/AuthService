@@ -15,7 +15,6 @@ import com.innowise.authservice.repository.UserRepository;
 import com.innowise.authservice.service.AuthenticationService;
 import com.innowise.authservice.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -114,7 +113,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     @Transactional
-    public ResponseEntity<AuthenticationResponseDto> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<AuthenticationResponseDto> refreshToken(HttpServletRequest request) {
         String authorizationHeader = request.getHeader(JWT_HEADER_NAME);
 
         if (authorizationHeader == null || !authorizationHeader.startsWith(JWT_HEADER_PREFIX)) {

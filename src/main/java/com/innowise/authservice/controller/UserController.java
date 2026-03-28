@@ -5,6 +5,7 @@ import com.innowise.authservice.dto.PaymentCardDto;
 import com.innowise.authservice.dto.UserDto;
 import com.innowise.authservice.service.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import static com.innowise.authservice.constant.TokenInfo.*;
@@ -17,7 +18,7 @@ import java.util.List;
  * Accesses user information and payment cards by extracting user identity from JWT.
  */
 @RestController
-@RequestMapping(value = "/user", produces = "application/json")
+@RequestMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class UserController {
 
@@ -33,8 +34,7 @@ public class UserController {
      */
     @GetMapping("/profile")
     public ResponseEntity<UserDto> getMyProfile(@RequestHeader(JWT_HEADER_NAME) String authHeader) {
-        String token = authHeader.substring(JWT_HEADER_PREFIX.length());
-        Long userId = Long.parseLong(jwtService.extractUserId(token));
+        Long userId = extractIdFromHeader(authHeader);
 
         UserDto userDto = userClient.getUserById(userId);
 
@@ -50,8 +50,8 @@ public class UserController {
      */
     @GetMapping("/payment-cards")
     public ResponseEntity<List<PaymentCardDto>> getMyCards(@RequestHeader(JWT_HEADER_NAME) String authHeader) {
-        String token = authHeader.substring(JWT_HEADER_PREFIX.length());
-        Long userId = Long.parseLong(jwtService.extractUserId(token));
+        Long userId = extractIdFromHeader(authHeader);
+
 
         List<PaymentCardDto> cards = userClient.getAllPaymentCardsByUserId(userId);
 
@@ -68,12 +68,25 @@ public class UserController {
      */
     @PutMapping("/update")
     public ResponseEntity<UserDto> updateUser(@RequestHeader(JWT_HEADER_NAME) String authHeader, @RequestBody UserDto userDto) {
-        String token = authHeader.substring(JWT_HEADER_PREFIX.length());
-        Long userId = Long.parseLong(jwtService.extractUserId(token));
+        Long userId = extractIdFromHeader(authHeader);
 
         UserDto updatedUserDto = userClient.updateUser(userId, userDto);
 
         return ResponseEntity.ok(updatedUserDto);
+    }
+
+    /**
+     * Extracts the user ID from the Authorization header.
+     * @param authHeader
+     * @return the extracted user identifier as a {@link Long}.
+     */
+    private Long extractIdFromHeader(String authHeader){
+        
+        String token = authHeader.substring(JWT_HEADER_PREFIX.length());
+        
+        Long userId = Long.parseLong(jwtService.extractUserId(token));
+        
+        return userId;
     }
 
 }

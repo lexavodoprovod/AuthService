@@ -1,15 +1,19 @@
 package com.innowise.authservice.controller;
 
+import com.innowise.authservice.client.OrderClient;
 import com.innowise.authservice.dto.OrderDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/admin/orders", produces = "application/json")
+@RequestMapping(value = "/admin/orders", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class OrderAdminController {
+
+    private final OrderClient orderClient;
 
     /**
      * Creates a new order.
@@ -19,7 +23,10 @@ public class OrderAdminController {
      */
     @PostMapping
     public ResponseEntity<OrderDto> addOrder(@RequestBody OrderDto orderDto) {
-        return ResponseEntity.ok().body(new OrderDto());
+
+        OrderDto addedOrderDto = orderClient.addOrder(orderDto);
+
+        return ResponseEntity.ok(addedOrderDto);
     }
 
     /**
@@ -29,7 +36,10 @@ public class OrderAdminController {
      */
     @GetMapping
     public ResponseEntity<Page<OrderDto>> getAllOrders() {
-        return ResponseEntity.ok().body(Page.empty());
+
+        Page<OrderDto> orderDtoPage = orderClient.getAllOrders();
+
+        return ResponseEntity.ok(orderDtoPage);
     }
 
     /**
@@ -41,7 +51,10 @@ public class OrderAdminController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<OrderDto> updateOrder(@PathVariable Long id, @RequestBody OrderDto orderDto) {
-        return ResponseEntity.ok().body(new OrderDto());
+
+        OrderDto updatedOrderDto = orderClient.updateOrder(id, orderDto);
+
+        return ResponseEntity.ok(updatedOrderDto);
     }
 
     /**
@@ -52,6 +65,6 @@ public class OrderAdminController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long id) {
-        return ResponseEntity.noContent().build();
+        return orderClient.deleteOrder(id);
     }
 }

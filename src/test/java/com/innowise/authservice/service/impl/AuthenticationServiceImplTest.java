@@ -15,7 +15,6 @@ import com.innowise.authservice.repository.TokenRepository;
 import com.innowise.authservice.repository.UserRepository;
 import com.innowise.authservice.service.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -56,8 +55,6 @@ class AuthenticationServiceImplTest {
 
     @Mock
     private HttpServletRequest request;
-    @Mock
-    private HttpServletResponse response;
 
     @InjectMocks
     private AuthenticationServiceImpl authenticationService;
@@ -246,10 +243,9 @@ class AuthenticationServiceImplTest {
             when(jwtService.generateAccessToken(user)).thenReturn(newAccessToken);
             when(jwtService.generateRefreshToken(user)).thenReturn(newRefreshToken);
 
-            ResponseEntity<AuthenticationResponseDto> responseEntity = authenticationService.refreshToken(request, response);
+            ResponseEntity<AuthenticationResponseDto> responseEntity = authenticationService.refreshToken(request);
 
             assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-            assertNotNull(responseEntity.getBody());
             assertEquals(newAccessToken, responseEntity.getBody().getAccessToken());
             assertEquals(newRefreshToken, responseEntity.getBody().getRefreshToken());
 
@@ -268,7 +264,7 @@ class AuthenticationServiceImplTest {
             when(userRepository.findByUsername(username)).thenReturn(Optional.empty());
 
             assertThrows(org.springframework.security.core.userdetails.UsernameNotFoundException.class,
-                    () -> authenticationService.refreshToken(request, response));
+                    () -> authenticationService.refreshToken(request));
         }
 
         @Test
@@ -276,7 +272,7 @@ class AuthenticationServiceImplTest {
         void shouldReturnUnauthorizedWhenHeaderIsMissing() {
             when(request.getHeader(JWT_HEADER_NAME)).thenReturn(null);
 
-            ResponseEntity<AuthenticationResponseDto> responseEntity = authenticationService.refreshToken(request, response);
+            ResponseEntity<AuthenticationResponseDto> responseEntity = authenticationService.refreshToken(request);
 
             assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
             verify(jwtService, never()).extractUsername(anyString());
@@ -295,7 +291,7 @@ class AuthenticationServiceImplTest {
 
             when(jwtService.isValidRefreshToken(invalidToken, user)).thenReturn(false);
 
-            ResponseEntity<AuthenticationResponseDto> responseEntity = authenticationService.refreshToken(request, response);
+            ResponseEntity<AuthenticationResponseDto> responseEntity = authenticationService.refreshToken(request);
 
             assertEquals(HttpStatus.UNAUTHORIZED, responseEntity.getStatusCode());
             verify(jwtService, never()).generateAccessToken(any());

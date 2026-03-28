@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -52,8 +52,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exception, status);
     }
 
-    @ExceptionHandler(UserServiceException.class)
-    public ResponseEntity<ErrorDetails> handleNotFound(UserServiceException e) {
+    @ExceptionHandler(FeignServiceException.class)
+    public ResponseEntity<ErrorDetails> handleNotFound(FeignServiceException e) {
         HttpStatus status = HttpStatus.SERVICE_UNAVAILABLE;
         ErrorDetails exception = ErrorDetails.builder()
                 .message(e.getMessage())
@@ -89,22 +89,43 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(JwtException.class)
-    public ResponseEntity<String> handleJwtException(JwtException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT processing failed: " + e.getMessage());
+    public ResponseEntity<ErrorDetails> handleJwtException(JwtException e) {
+        HttpStatus httpError = HttpStatus.UNAUTHORIZED;
+        ErrorDetails exception = ErrorDetails.builder()
+                .message(e.getMessage())
+                .errorName(httpError.getReasonPhrase())
+                .httpStatus(httpError.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(exception, httpError);
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
-    public ResponseEntity<String> handleUsernameException(UsernameNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT processing failed: " + e.getMessage());
+    public ResponseEntity<ErrorDetails> handleUsernameException(UsernameNotFoundException e) {
+        HttpStatus httpError = HttpStatus.UNAUTHORIZED;
+        ErrorDetails exception = ErrorDetails.builder()
+                .message(e.getMessage())
+                .errorName(httpError.getReasonPhrase())
+                .httpStatus(httpError.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(exception, httpError);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException e) {
-        Map<String, String> errors = new HashMap<>();
-        e.getBindingResult()
-                .getFieldErrors()
-                .forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
-        return  ResponseEntity.badRequest().body(errors);
+    public ResponseEntity<ErrorDetails> handleValidation(MethodArgumentNotValidException e) {
+        String errorMessage = e.getBindingResult().getFieldErrors().stream()
+                .map(err -> err.getField() + ": " + err.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+        ErrorDetails error = ErrorDetails.builder()
+                .message(errorMessage)
+                .errorName("Validation Error")
+                .httpStatus(status.value())
+                .timestamp(LocalDateTime.now())
+                .build();
+        return new ResponseEntity<>(error, status);
     }
 
 

@@ -1,7 +1,7 @@
 package com.innowise.authservice.exception;
 
-public class UserServiceException extends RuntimeException {
+public class UserServiceException extends FeignServiceException {
     public UserServiceException() {
-        super("User Service is unavailable");
+        super("UserService is unavailable");
     }
 }

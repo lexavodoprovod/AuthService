@@ -1,20 +1,21 @@
 package com.innowise.authservice.controller;
 
-import com.innowise.authservice.client.PaymentCardClient;
+import com.innowise.authservice.client.CardClient;
 import com.innowise.authservice.dto.PaymentCardDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/admin/cards", produces = "application/json")
+@RequestMapping(value = "/admin/cards", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 public class CardAdminController {
 
-    private final PaymentCardClient paymentCardClient;
+    private final CardClient paymentCardClient;
 
 
     /**
