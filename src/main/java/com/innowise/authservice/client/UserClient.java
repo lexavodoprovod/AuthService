@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "user-client",
-            url = "${USER_SERVICE_URL}",
+@FeignClient(name = "user-service",
             path = "/users",
             fallback = UserClientFallBack.class)
 public interface UserClient {
