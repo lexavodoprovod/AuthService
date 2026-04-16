@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
  */
 public interface AuthenticationService {
 
+    Long save(RegistrationDto registrationDto);
+
     /**
      * Registers a new user in the system.
      * Validates input data, communicates with the User Microservice via Feign client,

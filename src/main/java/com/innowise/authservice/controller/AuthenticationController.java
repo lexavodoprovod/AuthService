@@ -24,6 +24,12 @@ public class AuthenticationController {
     private final AuthenticationService authenticationService;
     private final JwtService jwtService;
 
+    @PostMapping("/save")
+    public ResponseEntity<String> save(@RequestBody RegistrationDto registrationDto) {
+        Long id = authenticationService.save(registrationDto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(successfulRegistrationUserWithId(id));
+    }
+
     /**
      * Registers a new user in the system.
      *
@@ -33,7 +39,7 @@ public class AuthenticationController {
     @PostMapping("/registration")
     public ResponseEntity<String> register(@RequestBody RegistrationDto registrationDto) {
         Long id = authenticationService.register(registrationDto);
-        return ResponseEntity.ok().body("User registered successfully with id: %s".formatted(id));
+        return ResponseEntity.status(HttpStatus.CREATED).body(successfulRegistrationUserWithId(id));
     }
 
     /**
@@ -83,5 +89,9 @@ public class AuthenticationController {
         return isValid ? ResponseEntity.ok().build()
                 : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
 
+    }
+
+    private String successfulRegistrationUserWithId(Long id){
+        return "User registered successfully with id: %s".formatted(id);
     }
 }

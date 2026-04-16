@@ -61,6 +61,60 @@ class AuthenticationServiceImplTest {
 
 
     @Nested
+    @DisplayName("Save User tests")
+    class SaveUserTests {
+
+        @Test
+        @DisplayName("Should successfully save a new user")
+        void save_ShouldReturnUserId_WhenDataIsValid() {
+            RegistrationDto dto = new RegistrationDto();
+            dto.setId(1L);
+            dto.setUsername("nikita");
+            dto.setPassword("rawPassword");
+
+            User userToSave = User.builder()
+                    .id(1L)
+                    .username("nikita")
+                    .password("encodedPassword")
+                    .build();
+
+            when(userRepository.existsByUsername("nikita")).thenReturn(false);
+            when(passwordEncoder.encode("rawPassword")).thenReturn("encodedPassword");
+            when(userRepository.save(any(User.class))).thenReturn(userToSave);
+
+            Long savedId = authenticationService.save(dto);
+
+            assertEquals(1L, savedId);
+            verify(userRepository).existsByUsername("nikita");
+            verify(passwordEncoder).encode("rawPassword");
+            verify(userRepository).save(any(User.class));
+        }
+
+        @Test
+        @DisplayName("Should throw NullParameterException when registrationDto is null")
+        void save_ShouldThrowNullParameterException_WhenDtoIsNull() {
+            assertThrows(NullParameterException.class, () -> authenticationService.save(null));
+
+            verifyNoInteractions(userRepository, passwordEncoder);
+        }
+
+        @Test
+        @DisplayName("Should throw ExistUserException when username already exists")
+        void save_ShouldThrowExistUserException_WhenUsernameExists() {
+            RegistrationDto dto = new RegistrationDto();
+            dto.setUsername("existingUser");
+
+            when(userRepository.existsByUsername("existingUser")).thenReturn(true);
+
+            assertThrows(ExistUserException.class, () -> authenticationService.save(dto));
+
+            verify(userRepository).existsByUsername("existingUser");
+            verifyNoMoreInteractions(passwordEncoder, userRepository);
+        }
+    }
+
+
+    @Nested
     @DisplayName("Register tests")
     class RegisterTests {
 

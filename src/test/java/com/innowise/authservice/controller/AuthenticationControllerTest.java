@@ -18,10 +18,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
 import static com.innowise.authservice.constant.TokenInfo.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
@@ -66,6 +69,71 @@ class AuthenticationControllerTest extends BaseIT {
     }
 
     @Nested
+    @DisplayName("Save endpoint tests")
+    class SaveTests {
+
+        String savePath = "/auth/save";
+
+        @Test
+        @DisplayName("Should return 201 CREATED and success message when user is saved")
+        void save_ShouldReturnOk_WhenUserIsRegistered() throws Exception {
+            RegistrationDto registrationDto = RegistrationDto.builder()
+                    .id(1L)
+                    .username("nikita_user")
+                    .password("password123")
+                    .name("Nikita")
+                    .email("nikita@example.com")
+                    .build();
+
+            mockMvc.perform(MockMvcRequestBuilders.post(savePath)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(registrationDto)))
+                    .andExpect(status().isCreated());
+
+            Optional<User> user = userRepository.findById(1L);
+
+            assertTrue(user.isPresent());
+        }
+
+        @Test
+        @DisplayName("Should return 400 Bad Request when JSON is empty or invalid")
+        void save_ShouldReturnBadRequest_WhenJsonIsMalformed() throws Exception {
+            mockMvc.perform(MockMvcRequestBuilders.post(savePath)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(""))
+                    .andExpect(status().isBadRequest());
+        }
+
+        @Test
+        @DisplayName("Should handle ExistUserException if user with this username already exist")
+        void save_ShouldReturnErrorStatus_WhenServiceThrowsException() throws Exception {
+
+            User user = User.builder()
+                    .id(2L)
+                    .username("nikita_user")
+                    .password("password123")
+                    .build();
+
+            RegistrationDto registrationDto = RegistrationDto.builder()
+                    .id(1L)
+                    .username("nikita_user")
+                    .password("password123")
+                    .name("Nikita")
+                    .email("nikita@example.com")
+                    .build();
+
+            userRepository.save(user);
+
+
+            mockMvc.perform(MockMvcRequestBuilders.post(savePath)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(registrationDto)))
+                    .andExpect(status().isConflict())
+                    .andExpect(MockMvcResultMatchers.jsonPath("$.message").value("User with username [nikita_user] already exists!"));
+        }
+    }
+
+    @Nested
     @DisplayName("Register Integration Tests")
     class RegisterIntegrationTests{
         @Test
@@ -86,10 +154,10 @@ class AuthenticationControllerTest extends BaseIT {
 
             mockMvc.perform(MockMvcRequestBuilders
                             .post("/auth/registration")
-                            .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                            .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(registrationDto))
                             .accept(org.springframework.http.MediaType.APPLICATION_JSON))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isCreated());
 
 
 
@@ -120,7 +188,7 @@ class AuthenticationControllerTest extends BaseIT {
                             .post("/auth/registration")
                             .contentType(org.springframework.http.MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(registrationDto))
-                            .accept(org.springframework.http.MediaType.APPLICATION_JSON))
+                            .accept(MediaType.APPLICATION_JSON))
                     .andExpect(status().isConflict());
         }
 

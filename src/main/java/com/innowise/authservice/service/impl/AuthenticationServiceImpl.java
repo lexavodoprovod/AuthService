@@ -46,6 +46,30 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserClient userClient;
 
     @Override
+    public Long save(RegistrationDto registrationDto) {
+
+        if(registrationDto == null){
+            throw new NullParameterException();
+        }
+
+        String username = registrationDto.getUsername();
+
+        if(userRepository.existsByUsername(username)){
+            throw new ExistUserException(username);
+        }
+
+        User user = User.builder()
+                .id(registrationDto.getId())
+                .username(username)
+                .password(passwordEncoder.encode(registrationDto.getPassword()))
+                .build();
+
+        User savedUser = userRepository.save(user);
+
+        return savedUser.getId();
+    }
+
+    @Override
     @Transactional
     public Long register(RegistrationDto registrationDto) {
 

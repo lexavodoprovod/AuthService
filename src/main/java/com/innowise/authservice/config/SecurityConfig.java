@@ -28,6 +28,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 public class SecurityConfig {
 
     private static final String BASIC_URL = "/";
+    private static final String SAVE_URL = "/auth/save";
     private static final String LOGIN_URL = "/auth/login";
     private static final String REGISTRATION_URL = "/auth/registration";
     private static final String REFRESH_TOKEN_URL = "/auth/refresh_token";
@@ -52,7 +53,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable);
 
         http.authorizeHttpRequests(auth -> {
-            auth.requestMatchers(LOGIN_URL,REGISTRATION_URL,REFRESH_TOKEN_URL, BASIC_URL)
+            auth.requestMatchers(LOGIN_URL,REGISTRATION_URL,REFRESH_TOKEN_URL, BASIC_URL, SAVE_URL)
                     .permitAll();
             auth.requestMatchers(USER_URL).authenticated();
             auth.requestMatchers(ADMIN_URL).hasAuthority(Role.ADMIN.name());
