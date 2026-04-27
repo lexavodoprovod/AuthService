@@ -83,7 +83,8 @@ public class JwtServiceImpl implements JwtService {
        String username = extractUsername(token);
 
         boolean isValidToken = tokenRepository.findTokenByAccessToken(token)
-                .map(t -> !t.isLoggedOut()).orElse(false);
+                .map(t -> !t.isLoggedOut())
+                .orElse(false);
 
         return username.equals(user.getUsername())
                 && isTokenExpired(token)

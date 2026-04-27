@@ -50,21 +50,28 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable);
+        http
+                .csrf(AbstractHttpConfigurer::disable)
 
-        http.authorizeHttpRequests(auth -> {
-            auth.requestMatchers(LOGIN_URL,REGISTRATION_URL,REFRESH_TOKEN_URL, BASIC_URL, SAVE_URL)
-                    .permitAll();
-            auth.requestMatchers(USER_URL).authenticated();
-            auth.requestMatchers(ADMIN_URL).hasAuthority(Role.ADMIN.name());
-            auth.anyRequest().authenticated();
-        }).userDetailsService(userService)
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers(LOGIN_URL,REGISTRATION_URL,REFRESH_TOKEN_URL, BASIC_URL, SAVE_URL)
+                            .permitAll();
+                    auth.requestMatchers(USER_URL).authenticated();
+                    auth.requestMatchers(ADMIN_URL).hasAuthority(Role.ADMIN.name());
+                    auth.anyRequest().authenticated();
+                 })
+
+                .userDetailsService(userService)
+
                 .exceptionHandling(e -> {
                     e.accessDeniedHandler(accessDeniedHandler);
                     e.authenticationEntryPoint(authenticationEntryPointHandler);
                 })
+
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
+
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .logout(log -> {
                     log.logoutUrl(LOGOUT_URL);
                     log.addLogoutHandler(customLogoutHandler);
