@@ -25,6 +25,7 @@ public class JwtServiceImpl implements JwtService {
 
     private static final String USERNAME = "username";
     private static final String ROLE = "role";
+    private static final String JTI = "jti";
 
     private final TokenRepository tokenRepository;
 
@@ -113,7 +114,7 @@ public class JwtServiceImpl implements JwtService {
                 .subject(String.valueOf(user.getId()))
                 .claim(USERNAME, user.getUsername())
                 .claim(ROLE, user.getRole().name())
-                .claim("jti", UUID.randomUUID().toString())
+                .claim(JTI, UUID.randomUUID().toString())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiryTime))
                 .signWith(getSigningKey(), Jwts.SIG.HS512);
