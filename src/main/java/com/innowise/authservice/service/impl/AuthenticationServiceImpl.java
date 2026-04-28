@@ -150,20 +150,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("No user found"));
 
-        if (jwtService.isValidRefreshToken(token, user)) {
-
-            String accessToken = jwtService.generateAccessToken(user);
-            String refreshToken = jwtService.generateRefreshToken(user);
-
-            revokeAllToken(user);
-
-            saveUserToken(accessToken, refreshToken, user);
-
-            return new ResponseEntity<>(new AuthenticationResponseDto(accessToken, refreshToken), HttpStatus.OK);
-
+        if (!jwtService.isValidRefreshToken(token, user)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user);
+
+        revokeAllToken(user);
+
+        saveUserToken(accessToken, refreshToken, user);
+
+        return new ResponseEntity<>(new AuthenticationResponseDto(accessToken, refreshToken), HttpStatus.OK);
+
     }
 
     private void revokeAllToken(User user) {
