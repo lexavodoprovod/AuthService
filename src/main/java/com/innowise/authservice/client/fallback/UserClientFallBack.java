@@ -49,6 +49,11 @@ public class UserClientFallBack implements UserClient, CardClient {
     }
 
     @Override
+    public PaymentCardDto addPaymentCard(PaymentCardDto paymentCardDto) {
+        throw new UserServiceException();
+    }
+
+    @Override
     public Page<PaymentCardDto> getAllPaymentCards(String number, Pageable pageable) {
         throw new UserServiceException();
     }

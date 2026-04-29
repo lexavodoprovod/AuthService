@@ -7,17 +7,19 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-@FeignClient(name = "payment-card-client",
-             url = "${USER_SERVICE_URL}",
+import static com.innowise.authservice.constant.PaginationSettings.*;
+@FeignClient(name = "user-service",
+            contextId = "cardClient",
              path = "/payment-cards",
              fallback = UserClientFallBack.class)
 public interface CardClient {
 
-    int PAGINATION_SIZE = 15;
-    String SORT_BY = "id";
+
+    @PostMapping
+    PaymentCardDto addPaymentCard(@Valid @RequestBody PaymentCardDto paymentCardDto);
 
     @GetMapping
    Page<PaymentCardDto> getAllPaymentCards(

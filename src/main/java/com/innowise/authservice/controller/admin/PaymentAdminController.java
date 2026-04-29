@@ -1,4 +1,4 @@
-package com.innowise.authservice.controller;
+package com.innowise.authservice.controller.admin;
 
 import com.innowise.authservice.client.PaymentClient;
 import com.innowise.authservice.dto.PaymentDto;

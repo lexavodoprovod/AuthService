@@ -1,15 +1,18 @@
-package com.innowise.authservice.controller;
+package com.innowise.authservice.controller.admin;
 
 import com.innowise.authservice.client.UserClient;
 import com.innowise.authservice.dto.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import static com.innowise.authservice.constant.PaginationSettings.*;
 
 
 @RestController
@@ -56,7 +59,7 @@ public class UserAdminController {
     @GetMapping
     public ResponseEntity<Page<UserDto>> getAllUsers(@RequestParam(required = false) String name,
                                                      @RequestParam(required = false) String surname,
-                                                     Pageable pageable) {
+                                                     @PageableDefault(size = PAGINATION_SIZE, sort = SORT_BY )Pageable pageable) {
         Page<UserDto> userDtoPage = userClient.getAllUsers(name, surname, pageable);
        return ResponseEntity.ok(userDtoPage);
     }

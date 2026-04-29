@@ -2,7 +2,10 @@ package com.innowise.authservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.innowise.authservice.client.OrderClient;
-import com.innowise.authservice.dto.OrderDto;
+import com.innowise.authservice.dto.UserDto;
+import com.innowise.authservice.dto.request.OrderRequestDto;
+import com.innowise.authservice.dto.response.OrderResponseDto;
+import com.innowise.authservice.entity.OrderStatus;
 import com.innowise.authservice.entity.Role;
 import com.innowise.authservice.entity.User;
 import org.junit.jupiter.api.DisplayName;
@@ -12,11 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -48,19 +53,22 @@ class OrderAdminControllerTest extends BaseIT{
         @DisplayName("Should create order successfully for Admin")
         void shouldCreateOrderForAdmin() throws Exception {
             User admin = User.builder().role(Role.ADMIN).build();
-            OrderDto inputDto = new OrderDto(1L);
-            OrderDto savedDto = new OrderDto(1L);
+            OrderRequestDto inputDto = new OrderRequestDto(1L, List.of());
+            OrderResponseDto savedDto = OrderResponseDto.builder()
+                    .id(1L)
+                    .userDto(new UserDto())
+                    .build();
 
-            when(orderClient.addOrder(any(OrderDto.class))).thenReturn(savedDto);
+            when(orderClient.addOrder(any(OrderRequestDto.class))).thenReturn(savedDto);
 
             mockMvc.perform(post("/admin/orders")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(objectMapper.writeValueAsString(inputDto))
                             .with(user(admin)))
-                    .andExpect(status().isOk())
+                    .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.id").value(1L));
 
-            verify(orderClient).addOrder(any(OrderDto.class));
+            verify(orderClient).addOrder(any(OrderRequestDto.class));
         }
 
         @Test
@@ -82,28 +90,41 @@ class OrderAdminControllerTest extends BaseIT{
     class GetAllOrdersTests {
 
         @Test
-        @DisplayName("Should return page of orders for Admin")
+        @DisplayName("Should return page of orders for Admin with parameters")
         void shouldReturnOrderPageForAdmin() throws Exception {
             User admin = User.builder().role(Role.ADMIN).build();
 
-            OrderDto order1 = new OrderDto(101L);
-            OrderDto order2 = new OrderDto(102L);
+            OrderResponseDto order1 = OrderResponseDto.builder().id(101L).build();
+            OrderResponseDto order2 = OrderResponseDto.builder().id(102L).build();
 
-            Page<OrderDto> mockPage = new PageImpl<>(List.of(order1, order2),
-                    PageRequest.of(0, 10), 2);
+            Page<OrderResponseDto> mockPage = new PageImpl<>(
+                    List.of(order1, order2),
+                    PageRequest.of(0, 10),
+                    2
+            );
 
-            when(orderClient.getAllOrders()).thenReturn(mockPage);
+            when(orderClient.getAllOrders(any(), any(), any(), any(Pageable.class)))
+                    .thenReturn(mockPage);
 
             mockMvc.perform(get("/admin/orders")
-                            .with(user(admin)))
+                            .with(user(admin))
+                            .param("from", "2026-01-01")
+                            .param("to", "2026-12-31")
+                            .param("statuses", "NEW,PAID")
+                            .param("page", "0")
+                            .param("size", "10"))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.content.length()").value(2))
-                    .andExpect(jsonPath("$.content[0].id").value(101L))
-                    .andExpect(jsonPath("$.content[1].id").value(102L))
-                    .andExpect(jsonPath("$.totalElements").value(2))
-                    .andExpect(jsonPath("$.totalPages").value(1));
+                    .andExpect(jsonPath("$.content[0].id").value(101))
+                    .andExpect(jsonPath("$.content[1].id").value(102))
+                    .andExpect(jsonPath("$.totalElements").value(2));
 
-            verify(orderClient).getAllOrders();
+            verify(orderClient).getAllOrders(
+                    eq(LocalDate.of(2026, 1, 1)),
+                    eq(LocalDate.of(2026, 12, 31)),
+                    eq(List.of(OrderStatus.NEW, OrderStatus.PAID)),
+                    any(Pageable.class)
+            );
         }
 
         @Test
@@ -129,20 +150,25 @@ class OrderAdminControllerTest extends BaseIT{
             User admin = User.builder().role(Role.ADMIN).build();
             Long orderId = 100L;
 
-            OrderDto updateRequest = new OrderDto(orderId);
-            OrderDto updatedResponse = new OrderDto(orderId);
+            OrderRequestDto updateRequest = new OrderRequestDto(orderId, List.of());
 
-            when(orderClient.updateOrder(eq(orderId), any(OrderDto.class)))
+            OrderResponseDto updatedResponse = OrderResponseDto.builder()
+                    .id(orderId)
+                    .status(OrderStatus.NEW)
+                    .build();
+
+            when(orderClient.updateOrder(eq(orderId), any(OrderRequestDto.class)))
                     .thenReturn(updatedResponse);
 
             mockMvc.perform(put("/admin/orders/{id}", orderId)
+                            .with(user(admin))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(updateRequest))
-                            .with(user(admin)))
+                            .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.id").value(orderId));
+                    .andExpect(jsonPath("$.id").value(orderId))
+                    .andExpect(jsonPath("$.status").value("NEW"));
 
-            verify(orderClient).updateOrder(eq(orderId), any(OrderDto.class));
+            verify(orderClient).updateOrder(eq(orderId), any(OrderRequestDto.class));
         }
 
         @Test
@@ -150,7 +176,7 @@ class OrderAdminControllerTest extends BaseIT{
         void shouldReturn403ForUserOnUpdate() throws Exception {
             User regularUser = User.builder().role(Role.USER).build();
             Long orderId = 100L;
-            OrderDto updateRequest = new OrderDto(orderId);
+            OrderRequestDto updateRequest = new OrderRequestDto(orderId, List.of());
 
             mockMvc.perform(put("/admin/orders/{id}", orderId)
                             .contentType(MediaType.APPLICATION_JSON)
@@ -159,6 +185,66 @@ class OrderAdminControllerTest extends BaseIT{
                     .andExpect(status().isForbidden());
 
             verifyNoInteractions(orderClient);
+        }
+    }
+
+    @Nested
+    @DisplayName("Tests for updateStatus method")
+    class UpdateStatusTests {
+
+        @Test
+        @DisplayName("Should update status successfully for Admin")
+        void shouldUpdateStatusForAdmin() throws Exception {
+            User admin = User.builder().role(Role.ADMIN).build();
+            Long orderId = 100L;
+            OrderStatus newStatus = OrderStatus.PAID;
+
+            OrderResponseDto updatedResponse = OrderResponseDto.builder()
+                    .id(orderId)
+                    .status(newStatus)
+                    .build();
+
+            when(orderClient.updateStatus(eq(orderId), eq(newStatus)))
+                    .thenReturn(updatedResponse);
+
+            mockMvc.perform(patch("/admin/orders/{id}/status", orderId)
+                            .with(user(admin))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(newStatus)))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.id").value(orderId))
+                    .andExpect(jsonPath("$.status").value("PAID"));
+
+            verify(orderClient).updateStatus(eq(orderId), eq(newStatus));
+        }
+
+        @Test
+        @DisplayName("Should return 403 Forbidden for User when updating status")
+        void shouldReturn403ForUserOnUpdateStatus() throws Exception {
+            User regularUser = User.builder().role(Role.USER).build();
+            Long orderId = 100L;
+            OrderStatus newStatus = OrderStatus.CANCELLED;
+
+            mockMvc.perform(patch("/admin/orders/{id}/status", orderId)
+                            .with(user(regularUser))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(newStatus)))
+                    .andExpect(status().isForbidden());
+
+            verifyNoInteractions(orderClient);
+        }
+
+        @Test
+        @DisplayName("Should return 400 Bad Request when status is invalid")
+        void shouldReturn400ForInvalidStatus() throws Exception {
+            User admin = User.builder().role(Role.ADMIN).build();
+            Long orderId = 100L;
+
+            mockMvc.perform(patch("/admin/orders/{id}/status", orderId)
+                            .with(user(admin))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content("\"INVALID_STATUS\""))
+                    .andExpect(status().isBadRequest());
         }
     }
 

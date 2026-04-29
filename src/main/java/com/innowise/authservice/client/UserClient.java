@@ -12,14 +12,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import static com.innowise.authservice.constant.PaginationSettings.*;
 
 @FeignClient(name = "user-service",
+            contextId = "userClient",
             path = "/users",
             fallback = UserClientFallBack.class)
 public interface UserClient {
 
-    int PAGINATION_SIZE = 15;
-    String SORT_BY = "id";
 
     @PostMapping
     UserDto addUser(@Valid @RequestBody UserDto userDto);

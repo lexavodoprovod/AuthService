@@ -34,6 +34,7 @@ public class SecurityConfig {
     private static final String REFRESH_TOKEN_URL = "/auth/refresh_token";
     private static final String ADMIN_URL = "/admin/**";
     private static final String USER_URL = "/user/**";
+    private static final String CARD_URL = "/cards/**";
     private static final String LOGOUT_URL = "/auth/logout";
 
 
@@ -56,7 +57,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> {
                     auth.requestMatchers(LOGIN_URL,REGISTRATION_URL,REFRESH_TOKEN_URL, BASIC_URL, SAVE_URL)
                             .permitAll();
-                    auth.requestMatchers(USER_URL).authenticated();
+                    auth.requestMatchers(USER_URL, CARD_URL).authenticated();
                     auth.requestMatchers(ADMIN_URL).hasAuthority(Role.ADMIN.name());
                     auth.anyRequest().authenticated();
                  })
