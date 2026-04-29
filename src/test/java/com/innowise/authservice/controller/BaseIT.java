@@ -34,9 +34,5 @@ public abstract class BaseIT {
         registry.add("SECRET_KEY", () -> "R0hKS0xNT1BRVFNUVVZXWFlaQUJDREVGR0hKS0xNT1BRVFNUVVZXWFlaQUJDREVGR0hKS0xNT1BRVFNUVVZXWA==");
         registry.add("ACCESS_TOKEN_EXPIRATION", () -> "36000000");
         registry.add("REFRESH_TOKEN_EXPIRATION", () -> "25204000");
-        registry.add("USER_SERVICE_URL", () -> "http://mock");
-        registry.add("ORDER_SERVICE_URL", () -> "http://mock");
-        registry.add("PAYMENT_SERVICE_URL", () -> "http://mock");
-
     }
 }

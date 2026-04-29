@@ -7,8 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "payment-client",
-        url = "${PAYMENT_SERVICE_URL}",
+@FeignClient(name = "payment-service",
         path = "/payments",
         fallback = PaymentClientFallBack.class)
 public interface PaymentClient {
