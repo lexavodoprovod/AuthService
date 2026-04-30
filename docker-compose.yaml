@@ -12,9 +12,6 @@ services:
       - SECRET_KEY=${SECRET_KEY}
       - ACCESS_TOKEN_EXPIRATION=${ACCESS_TOKEN_EXPIRATION}
       - REFRESH_TOKEN_EXPIRATION=${REFRESH_TOKEN_EXPIRATION}
-      - USER_SERVICE_URL=${USER_SERVICE_URL}
-      - PAYMENT_SERVICE_URL=${PAYMENT_SERVICE_URL}
-      - ORDER_SERVICE_URL=${ORDER_SERVICE_URL}
     depends_on:
       auth-db:
         condition: service_healthy
@@ -26,7 +23,7 @@ services:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-    container_name: credentials_db_postgres
+    container_name: credentials_db_postgres_local
     ports:
       - "5432:5432"
     healthcheck:
