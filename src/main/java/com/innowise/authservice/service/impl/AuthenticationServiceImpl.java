@@ -33,6 +33,9 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
+
+    private static final String USERNAME_NOT_FOUND_MESSAGE = "No user found";
+
     private final UserRepository userRepository;
 
     private final JwtService jwtService;
@@ -148,7 +151,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         String username = jwtService.extractUsername(token);
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("No user found"));
+                .orElseThrow(() -> new UsernameNotFoundException(USERNAME_NOT_FOUND_MESSAGE));
 
         if (!jwtService.isValidRefreshToken(token, user)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
