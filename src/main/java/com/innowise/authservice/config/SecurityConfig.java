@@ -36,6 +36,7 @@ public class SecurityConfig {
     private static final String USER_URL = "/user/**";
     private static final String CARD_URL = "/cards/**";
     private static final String LOGOUT_URL = "/auth/logout";
+    private static final String ACTUATOR_URL = "/actuator/health/**";
 
 
     private final JwtFilter jwtFilter;
@@ -55,7 +56,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
 
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers(LOGIN_URL,REGISTRATION_URL,REFRESH_TOKEN_URL, BASIC_URL, SAVE_URL)
+                    auth.requestMatchers(LOGIN_URL,REGISTRATION_URL,REFRESH_TOKEN_URL, BASIC_URL, SAVE_URL, ACTUATOR_URL)
                             .permitAll();
                     auth.requestMatchers(USER_URL, CARD_URL).authenticated();
                     auth.requestMatchers(ADMIN_URL).hasAuthority(Role.ADMIN.name());
