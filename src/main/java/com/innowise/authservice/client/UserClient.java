@@ -1,6 +1,6 @@
 package com.innowise.authservice.client;
 
-import com.innowise.authservice.client.fallback.UserClientFallBack;
+import com.innowise.authservice.client.fallback.UserClientFallBackFactory;
 import com.innowise.authservice.dto.PaymentCardDto;
 import com.innowise.authservice.dto.UserDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -17,7 +17,7 @@ import static com.innowise.authservice.constant.PaginationSettings.*;
 @FeignClient(name = "user-service",
             contextId = "userClient",
             path = "/users",
-            fallback = UserClientFallBack.class)
+            fallbackFactory = UserClientFallBackFactory.class)
 public interface UserClient {
 
 

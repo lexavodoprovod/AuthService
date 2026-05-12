@@ -1,6 +1,6 @@
 package com.innowise.authservice.client;
 
-import com.innowise.authservice.client.fallback.ItemClientFallBack;
+import com.innowise.authservice.client.fallback.ItemClientFallBackFactory;
 import com.innowise.authservice.dto.request.ItemDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
@@ -14,7 +14,7 @@ import static com.innowise.authservice.constant.PaginationSettings.*;
 @FeignClient(name = "order-service",
         contextId = "itemClient",
         path = "/items",
-        fallback = ItemClientFallBack.class)
+        fallbackFactory = ItemClientFallBackFactory.class)
 public interface ItemClient {
 
     @PostMapping

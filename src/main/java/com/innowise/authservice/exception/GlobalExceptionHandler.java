@@ -3,6 +3,7 @@ package com.innowise.authservice.exception;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import io.jsonwebtoken.JwtException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,7 +16,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final ObjectMapper mapper;
 
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<ErrorDetails> handleFeignException(FeignException e) {
@@ -24,8 +28,6 @@ public class GlobalExceptionHandler {
         String message;
 
         try {
-            ObjectMapper mapper = new ObjectMapper();
-
             Map<String, Object> map = mapper.readValue(errorBody, Map.class);
 
             if (map.containsKey("message")) {
@@ -52,8 +54,8 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exception, status);
     }
 
-    @ExceptionHandler(FeignServiceException.class)
-    public ResponseEntity<ErrorDetails> handleNotFound(FeignServiceException e) {
+    @ExceptionHandler(InternalServiceException.class)
+    public ResponseEntity<ErrorDetails> handleNotFound(InternalServiceException e) {
         HttpStatus status = HttpStatus.SERVICE_UNAVAILABLE;
         ErrorDetails exception = ErrorDetails.builder()
                 .message(e.getMessage())

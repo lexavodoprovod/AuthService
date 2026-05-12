@@ -1,6 +1,6 @@
 package com.innowise.authservice.client;
 
-import com.innowise.authservice.client.fallback.OrderClientFallBack;
+import com.innowise.authservice.client.fallback.OrderClientFallBackFactory;
 import com.innowise.authservice.dto.request.OrderRequestDto;
 import com.innowise.authservice.dto.response.OrderResponseDto;
 import com.innowise.authservice.entity.OrderStatus;
@@ -20,7 +20,7 @@ import static com.innowise.authservice.constant.PaginationSettings.*;
 @FeignClient(name = "order-service",
         contextId = "orderClient",
         path = "/orders",
-        fallback = OrderClientFallBack.class)
+        fallbackFactory = OrderClientFallBackFactory.class)
 public interface OrderClient {
 
     @PostMapping
