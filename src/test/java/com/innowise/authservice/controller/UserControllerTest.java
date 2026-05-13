@@ -236,7 +236,7 @@ class UserControllerTest extends BaseIT{
     class GetMyCardsTests {
 
         @Test
-        @DisplayName("Should return list of cards when user has them")
+        @DisplayName("Should return list of active cards when user has them")
         void shouldReturnCardsWhenAuthenticated() throws Exception {
             Long userId = 1L;
             User mockUser = User.builder()
@@ -266,7 +266,7 @@ class UserControllerTest extends BaseIT{
                     PaymentCardDto.builder().id(11L).number("5555666677778888").build()
             );
 
-            when(userClient.getAllPaymentCardsByUserId(userId)).thenReturn(mockCards);
+            when(userClient.getAllActiveCardsByUserId(userId)).thenReturn(mockCards);
 
             mockMvc.perform(get("/user/payment-cards")
                             .header(JWT_HEADER_NAME, bearerToken))
@@ -276,7 +276,7 @@ class UserControllerTest extends BaseIT{
                     .andExpect(jsonPath("$[0].number").value("1111222233334444"))
                     .andExpect(jsonPath("$[1].id").value(11L));
 
-            verify(userClient, times(1)).getAllPaymentCardsByUserId(userId);
+            verify(userClient, times(1)).getAllActiveCardsByUserId(userId);
         }
 
         @Test
@@ -306,7 +306,7 @@ class UserControllerTest extends BaseIT{
 
             String bearerToken = JWT_HEADER_PREFIX + accessToken;
 
-            when(userClient.getAllPaymentCardsByUserId(userId)).thenReturn(List.of());
+            when(userClient.getAllActiveCardsByUserId(userId)).thenReturn(List.of());
 
             mockMvc.perform(get("/user/payment-cards")
                             .header(JWT_HEADER_NAME, bearerToken))
@@ -349,14 +349,14 @@ class UserControllerTest extends BaseIT{
 
             String bearerToken = JWT_HEADER_PREFIX + accessToken;
 
-            when(userClient.getAllPaymentCardsByUserId(userId))
+            when(userClient.getAllActiveCardsByUserId(userId))
                     .thenThrow(new UserServiceException());
 
             mockMvc.perform(get("/user/payment-cards")
                             .header(JWT_HEADER_NAME, bearerToken))
                     .andExpect(status().isServiceUnavailable());
 
-            verify(userClient, times(1)).getAllPaymentCardsByUserId(userId);
+            verify(userClient, times(1)).getAllActiveCardsByUserId(userId);
         }
 
         @Test
@@ -391,7 +391,7 @@ class UserControllerTest extends BaseIT{
                     .expirationDate(LocalDate.of(2028, 12, 31))
                     .build();
 
-            when(userClient.getAllPaymentCardsByUserId(userId)).thenReturn(List.of(card));
+            when(userClient.getAllActiveCardsByUserId(userId)).thenReturn(List.of(card));
 
             mockMvc.perform(get("/user/payment-cards")
                             .header(JWT_HEADER_NAME, bearerToken))

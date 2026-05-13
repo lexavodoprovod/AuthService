@@ -27,12 +27,22 @@ public class UserClientFallBackFactory implements FallbackFactory<UserClient> {
             @Override
             public UserDto getUserById(Long id) {
                 throwFeignEx(cause);
-                throw new UserServiceException();            }
+                throw new UserServiceException();
+            }
+
+
 
             @Override
-            public List<PaymentCardDto> getAllPaymentCardsByUserId(Long id) {
+            public Page<PaymentCardDto> getAllPaymentCardsByUserId(Long id, String name, Pageable pageable) {
                 throwFeignEx(cause);
-                throw new UserServiceException();            }
+                throw new UserServiceException();
+            }
+
+            @Override
+            public List<PaymentCardDto> getAllActiveCardsByUserId(Long id) {
+                throwFeignEx(cause);
+                throw new UserServiceException();
+            }
 
             @Override
             public UserDto updateUser(Long id, UserDto userDto) {

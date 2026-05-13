@@ -111,6 +111,13 @@ class UserAdminControllerTest extends BaseIT{
     @Nested
     @DisplayName("Get User Cards by Admin Tests")
     class GetUserCardsTests {
+        List<PaymentCardDto> mockCards = List.of(
+                PaymentCardDto.builder().id(201L).number("4444555566667777").active(false).build(),
+                PaymentCardDto.builder().id(202L).number("1111000011110000").build()
+        );
+
+        Page<PaymentCardDto> mockPage = new PageImpl<>(mockCards,
+                PageRequest.of(0, 10), 2);
 
         @Test
         @DisplayName("Should return list of cards for a specific user ID when requested by Admin")
@@ -122,21 +129,20 @@ class UserAdminControllerTest extends BaseIT{
                     .role(Role.ADMIN)
                     .build();
 
-            List<PaymentCardDto> mockCards = List.of(
-                    PaymentCardDto.builder().id(201L).number("4444555566667777").build(),
-                    PaymentCardDto.builder().id(202L).number("1111000011110000").build()
-            );
-
-            when(userClient.getAllPaymentCardsByUserId(targetUserId)).thenReturn(mockCards);
+            when(userClient.getAllPaymentCardsByUserId(
+                    eq(targetUserId),
+                    eq(null),
+                    any(Pageable.class))).thenReturn(mockPage);
 
             mockMvc.perform(get("/admin/users/{id}/cards", targetUserId)
                             .with(user(admin)))
                     .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.length()").value(2))
-                    .andExpect(jsonPath("$[0].number").value("4444555566667777"))
-                    .andExpect(jsonPath("$[1].id").value(202L));
+                    .andExpect(jsonPath("$.content.length()").value(2))
+                    .andExpect(jsonPath("$.content[0].number").value("4444555566667777"))
+                    .andExpect(jsonPath("$.content[1].id").value(202L));
 
-            verify(userClient, times(1)).getAllPaymentCardsByUserId(targetUserId);
+            verify(userClient, times(1))
+                    .getAllPaymentCardsByUserId(eq(targetUserId),eq(null), any(Pageable.class));
         }
 
         @Test

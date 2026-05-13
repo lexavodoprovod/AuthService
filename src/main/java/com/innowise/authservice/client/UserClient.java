@@ -27,8 +27,15 @@ public interface UserClient {
     @GetMapping("/{id}")
     UserDto getUserById(@PathVariable Long id);
 
+    @GetMapping("/{id}/payment-cards-all")
+    Page<PaymentCardDto> getAllPaymentCardsByUserId(
+            @PathVariable Long id,
+            @RequestParam(required = false) String number,
+            @PageableDefault(size = PAGINATION_SIZE, sort = SORT_BY ) Pageable pageable
+    );
+
     @GetMapping("/{id}/payment-cards")
-    List<PaymentCardDto> getAllPaymentCardsByUserId(@PathVariable Long id);
+    List<PaymentCardDto> getAllActiveCardsByUserId(@PathVariable Long id);
 
     @PutMapping("/{id}")
     UserDto updateUser(@PathVariable Long id,@Valid @RequestBody UserDto userDto);

@@ -53,7 +53,7 @@ public class UserController {
         Long userId = extractIdFromHeader(authHeader);
 
 
-        List<PaymentCardDto> cards = userClient.getAllPaymentCardsByUserId(userId);
+        List<PaymentCardDto> cards = userClient.getAllActiveCardsByUserId(userId);
 
         return ResponseEntity.ok(cards);
     }

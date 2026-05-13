@@ -43,8 +43,12 @@ public class UserAdminController {
      * @return {@link ResponseEntity} containing a list of {@link PaymentCardDto}.
      */
     @GetMapping("/{id}/cards")
-    public ResponseEntity<List<PaymentCardDto>> getMyCards(@PathVariable Long id) {
-        List<PaymentCardDto> cards = userClient.getAllPaymentCardsByUserId(id);
+    public ResponseEntity<Page<PaymentCardDto>> getMyCards(
+            @PathVariable Long id,
+            @RequestParam(required = false) String number,
+            @PageableDefault(size = PAGINATION_SIZE, sort = SORT_BY )Pageable pageable
+    ) {
+        Page<PaymentCardDto> cards = userClient.getAllPaymentCardsByUserId(id, number, pageable);
         return ResponseEntity.ok(cards);
     }
 
@@ -57,9 +61,11 @@ public class UserAdminController {
      * @return {@link ResponseEntity} containing a {@link Page} of {@link UserDto}.
      */
     @GetMapping
-    public ResponseEntity<Page<UserDto>> getAllUsers(@RequestParam(required = false) String name,
-                                                     @RequestParam(required = false) String surname,
-                                                     @PageableDefault(size = PAGINATION_SIZE, sort = SORT_BY )Pageable pageable) {
+    public ResponseEntity<Page<UserDto>> getAllUsers(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String surname,
+            @PageableDefault(size = PAGINATION_SIZE, sort = SORT_BY )Pageable pageable
+    ) {
         Page<UserDto> userDtoPage = userClient.getAllUsers(name, surname, pageable);
        return ResponseEntity.ok(userDtoPage);
     }
