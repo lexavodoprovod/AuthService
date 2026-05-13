@@ -16,5 +16,6 @@ public class ItemDto {
     private String name;
 
     @Min(0)
+    @NotNull
     private Long price;
 }

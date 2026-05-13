@@ -2,6 +2,7 @@ package com.innowise.authservice.client;
 
 import com.innowise.authservice.client.fallback.ItemClientFallBackFactory;
 import com.innowise.authservice.dto.request.ItemDto;
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,7 @@ import static com.innowise.authservice.constant.PaginationSettings.*;
 public interface ItemClient {
 
     @PostMapping
-    ItemDto addItem(@RequestBody ItemDto itemDto);
+    ItemDto addItem(@Valid @RequestBody ItemDto itemDto);
 
     @GetMapping("/{id}")
     ItemDto getItemById(@PathVariable Long id);
@@ -30,7 +31,7 @@ public interface ItemClient {
     );
 
     @PutMapping
-    ItemDto updateItem(@RequestBody ItemDto itemDto);
+    ItemDto updateItem(@Valid @RequestBody ItemDto itemDto);
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> deleteItemById(@PathVariable Long id);

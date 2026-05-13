@@ -2,6 +2,7 @@ package com.innowise.authservice.controller.admin;
 
 import com.innowise.authservice.client.ItemClient;
 import com.innowise.authservice.dto.request.ItemDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +29,7 @@ public class ItemAdminController {
      * @return {@link ResponseEntity} containing the created {@link ItemDto}.
      */
     @PostMapping
-    public ResponseEntity<ItemDto> addItem(@RequestBody ItemDto itemRequestDto) {
+    public ResponseEntity<ItemDto> addItem(@Valid @RequestBody ItemDto itemRequestDto) {
 
         ItemDto itemDto = itemClient.addItem(itemRequestDto);
 
@@ -65,8 +66,8 @@ public class ItemAdminController {
      * @param itemRequestDto the updated item information.
      * @return {@link ResponseEntity} containing the updated {@link ItemDto}.
      */
-    @PutMapping("/{id}")
-    public ResponseEntity<ItemDto> updateItem(@RequestBody ItemDto itemRequestDto) {
+    @PutMapping
+    public ResponseEntity<ItemDto> updateItem(@Valid @RequestBody ItemDto itemRequestDto) {
 
         ItemDto itemDto = itemClient.updateItem(itemRequestDto);
 
