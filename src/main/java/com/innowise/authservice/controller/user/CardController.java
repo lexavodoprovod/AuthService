@@ -7,10 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import com.innowise.authservice.dto.PaymentCardDto;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping(value = "/cards", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -24,4 +21,10 @@ public class CardController {
         PaymentCardDto paymentCard = cardClient.addPaymentCard(paymentCardDto);
         return new ResponseEntity<>(paymentCard, HttpStatus.CREATED);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deactivateCard(@PathVariable Long id) {
+        return cardClient.deactivatePaymentCard(id);
+    }
+
 }

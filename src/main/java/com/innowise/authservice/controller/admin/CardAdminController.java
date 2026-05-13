@@ -6,9 +6,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import static com.innowise.authservice.constant.PaginationSettings.*;
 
 @RestController
 @RequestMapping(value = "/admin/cards", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -26,8 +29,9 @@ public class CardAdminController {
      * @return {@link ResponseEntity} containing a {@link Page} of {@link PaymentCardDto}.
      */
     @GetMapping
-    public ResponseEntity<Page<PaymentCardDto>> getAllCards(@RequestParam(required = false) String number,
-                                                            Pageable pageable) {
+    public ResponseEntity<Page<PaymentCardDto>> getAllCards(
+            @RequestParam(required = false) String number,
+            @PageableDefault(size = PAGINATION_SIZE, sort = SORT_BY) Pageable pageable) {
         Page<PaymentCardDto> cardDtoPage = paymentCardClient.getAllPaymentCards(number, pageable);
         return ResponseEntity.ok(cardDtoPage);
     }
