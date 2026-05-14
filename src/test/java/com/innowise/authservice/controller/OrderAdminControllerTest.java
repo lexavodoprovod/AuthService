@@ -3,6 +3,8 @@ package com.innowise.authservice.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.innowise.authservice.client.OrderClient;
 import com.innowise.authservice.dto.UserDto;
+import com.innowise.authservice.dto.request.ItemDto;
+import com.innowise.authservice.dto.request.OrderItemRequestDto;
 import com.innowise.authservice.dto.request.OrderRequestDto;
 import com.innowise.authservice.dto.response.OrderResponseDto;
 import com.innowise.authservice.entity.OrderStatus;
@@ -53,8 +55,9 @@ class OrderAdminControllerTest extends BaseIT{
         @DisplayName("Should create order successfully for Admin")
         void shouldCreateOrderForAdmin() throws Exception {
             User admin = User.builder().role(Role.ADMIN).build();
-            OrderRequestDto inputDto = new OrderRequestDto(1L, List.of());
-            OrderResponseDto savedDto = OrderResponseDto.builder()
+            OrderRequestDto inputDto = new OrderRequestDto(
+                    1L,
+                    List.of(new OrderItemRequestDto(1L,3)));            OrderResponseDto savedDto = OrderResponseDto.builder()
                     .id(1L)
                     .userDto(new UserDto())
                     .build();
@@ -150,7 +153,9 @@ class OrderAdminControllerTest extends BaseIT{
             User admin = User.builder().role(Role.ADMIN).build();
             Long orderId = 100L;
 
-            OrderRequestDto updateRequest = new OrderRequestDto(orderId, List.of());
+            OrderRequestDto updateRequest = new OrderRequestDto(
+                    orderId,
+                    List.of(new OrderItemRequestDto(1L,3)));
 
             OrderResponseDto updatedResponse = OrderResponseDto.builder()
                     .id(orderId)
