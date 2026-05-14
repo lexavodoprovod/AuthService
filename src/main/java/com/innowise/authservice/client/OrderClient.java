@@ -2,7 +2,7 @@ package com.innowise.authservice.client;
 
 import com.innowise.authservice.client.fallback.OrderClientFallBackFactory;
 import com.innowise.authservice.dto.request.OrderRequestDto;
-import com.innowise.authservice.dto.request.StatusUpdateRequest;
+import com.innowise.authservice.dto.request.UpdateOrderStatusRequest;
 import com.innowise.authservice.dto.response.OrderResponseDto;
 import com.innowise.authservice.entity.OrderStatus;
 import jakarta.validation.Valid;
@@ -49,7 +49,7 @@ public interface OrderClient {
     @PatchMapping("/{id}/status")
     OrderResponseDto updateStatus(
             @PathVariable Long id,
-            @RequestBody StatusUpdateRequest status);
+            @RequestBody UpdateOrderStatusRequest status);
 
     @DeleteMapping("/{id}")
     ResponseEntity<Void> deleteOrder(@PathVariable Long id);

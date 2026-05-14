@@ -2,7 +2,7 @@ package com.innowise.authservice.client.fallback;
 
 import com.innowise.authservice.client.OrderClient;
 import com.innowise.authservice.dto.request.OrderRequestDto;
-import com.innowise.authservice.dto.request.StatusUpdateRequest;
+import com.innowise.authservice.dto.request.UpdateOrderStatusRequest;
 import com.innowise.authservice.dto.response.OrderResponseDto;
 import com.innowise.authservice.entity.OrderStatus;
 import com.innowise.authservice.exception.callbackexceptions.OrderServiceException;
@@ -48,7 +48,7 @@ public class OrderClientFallBackFactory implements FallbackFactory<OrderClient> 
                 throw new OrderServiceException();            }
 
             @Override
-            public OrderResponseDto updateStatus(Long id, StatusUpdateRequest status) {
+            public OrderResponseDto updateStatus(Long id, UpdateOrderStatusRequest status) {
                 throwFeignEx(cause);
                 throw new OrderServiceException();            }
 

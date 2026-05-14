@@ -2,6 +2,7 @@ package com.innowise.authservice.client;
 
 import com.innowise.authservice.client.fallback.PaymentClientFallBackFactory;
 import com.innowise.authservice.dto.request.PaymentRequestDto;
+import com.innowise.authservice.dto.request.UpdatePaymentStatusRequest;
 import com.innowise.authservice.dto.response.PaymentResponseDto;
 import com.innowise.authservice.entity.PaymentStatus;
 import jakarta.validation.Valid;
@@ -50,7 +51,7 @@ public interface PaymentClient {
     @PatchMapping("/{id}")
     PaymentResponseDto changePaymentStatus(
             @PathVariable String id,
-            @RequestBody PaymentStatus status
+            @Valid @RequestBody UpdatePaymentStatusRequest status
     );
 
     @DeleteMapping("/{id}")

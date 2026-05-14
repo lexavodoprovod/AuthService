@@ -3,10 +3,9 @@ package com.innowise.authservice.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.innowise.authservice.client.OrderClient;
 import com.innowise.authservice.dto.UserDto;
-import com.innowise.authservice.dto.request.ItemDto;
 import com.innowise.authservice.dto.request.OrderItemRequestDto;
 import com.innowise.authservice.dto.request.OrderRequestDto;
-import com.innowise.authservice.dto.request.StatusUpdateRequest;
+import com.innowise.authservice.dto.request.UpdateOrderStatusRequest;
 import com.innowise.authservice.dto.response.OrderResponseDto;
 import com.innowise.authservice.entity.OrderStatus;
 import com.innowise.authservice.entity.Role;
@@ -203,7 +202,7 @@ class OrderAdminControllerTest extends BaseIT{
         void shouldUpdateStatusForAdmin() throws Exception {
             User admin = User.builder().role(Role.ADMIN).build();
             Long orderId = 100L;
-            StatusUpdateRequest updateRequest = new StatusUpdateRequest(OrderStatus.PAID);
+            UpdateOrderStatusRequest updateRequest = new UpdateOrderStatusRequest(OrderStatus.PAID);
 
             OrderResponseDto updatedResponse = OrderResponseDto.builder()
                     .id(orderId)

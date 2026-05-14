@@ -2,7 +2,7 @@ package com.innowise.authservice.controller.admin;
 
 import com.innowise.authservice.client.OrderClient;
 import com.innowise.authservice.dto.request.OrderRequestDto;
-import com.innowise.authservice.dto.request.StatusUpdateRequest;
+import com.innowise.authservice.dto.request.UpdateOrderStatusRequest;
 import com.innowise.authservice.dto.response.OrderResponseDto;
 import com.innowise.authservice.entity.OrderStatus;
 import jakarta.validation.Valid;
@@ -89,7 +89,7 @@ public class OrderAdminController {
     @PatchMapping("/{id}/status")
     public ResponseEntity<OrderResponseDto> updateStatus(
             @PathVariable Long id,
-            @Valid @RequestBody StatusUpdateRequest status){
+            @Valid @RequestBody UpdateOrderStatusRequest status){
 
         OrderResponseDto orderResponseDto = orderClient.updateStatus(id, status);
 

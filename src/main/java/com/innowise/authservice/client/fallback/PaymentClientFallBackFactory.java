@@ -2,6 +2,7 @@ package com.innowise.authservice.client.fallback;
 
 import com.innowise.authservice.client.PaymentClient;
 import com.innowise.authservice.dto.request.PaymentRequestDto;
+import com.innowise.authservice.dto.request.UpdatePaymentStatusRequest;
 import com.innowise.authservice.dto.response.PaymentResponseDto;
 import com.innowise.authservice.entity.PaymentStatus;
 import com.innowise.authservice.exception.callbackexceptions.PaymentServiceException;
@@ -49,7 +50,7 @@ public class PaymentClientFallBackFactory implements FallbackFactory<PaymentClie
             }
 
             @Override
-            public PaymentResponseDto changePaymentStatus(String id, PaymentStatus status) {
+            public PaymentResponseDto changePaymentStatus(String id, UpdatePaymentStatusRequest status) {
                 throwFeignEx(cause);
                 throw new PaymentServiceException();
             }
