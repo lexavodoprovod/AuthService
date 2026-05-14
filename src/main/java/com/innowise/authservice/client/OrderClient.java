@@ -4,6 +4,7 @@ import com.innowise.authservice.client.fallback.OrderClientFallBackFactory;
 import com.innowise.authservice.dto.request.OrderRequestDto;
 import com.innowise.authservice.dto.response.OrderResponseDto;
 import com.innowise.authservice.entity.OrderStatus;
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,7 +25,7 @@ import static com.innowise.authservice.constant.PaginationSettings.*;
 public interface OrderClient {
 
     @PostMapping
-    OrderResponseDto addOrder(@RequestBody OrderRequestDto orderDto);
+    OrderResponseDto addOrder(@Valid @RequestBody OrderRequestDto orderDto);
 
     @GetMapping("/{id}")
     OrderResponseDto getOrderById(@PathVariable Long id);
@@ -42,7 +43,7 @@ public interface OrderClient {
             @PageableDefault(size = PAGINATION_SIZE, sort = SORT_BY) Pageable pageable);
 
     @PutMapping("/{id}")
-    OrderResponseDto updateOrder(@PathVariable Long id, @RequestBody OrderRequestDto orderDto);
+    OrderResponseDto updateOrder(@PathVariable Long id,@Valid @RequestBody OrderRequestDto orderDto);
 
     @PatchMapping("/{id}/status")
     OrderResponseDto updateStatus(

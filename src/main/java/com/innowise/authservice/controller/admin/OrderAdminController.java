@@ -4,6 +4,7 @@ import com.innowise.authservice.client.OrderClient;
 import com.innowise.authservice.dto.request.OrderRequestDto;
 import com.innowise.authservice.dto.response.OrderResponseDto;
 import com.innowise.authservice.entity.OrderStatus;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -34,7 +35,7 @@ public class OrderAdminController {
      * @return {@link ResponseEntity} containing the created {@link OrderRequestDto}.
      */
     @PostMapping
-    public ResponseEntity<OrderResponseDto> addOrder(@RequestBody OrderRequestDto orderDto) {
+    public ResponseEntity<OrderResponseDto> addOrder(@Valid @RequestBody OrderRequestDto orderDto) {
 
         OrderResponseDto orderResponseDto = orderClient.addOrder(orderDto);
 
@@ -77,7 +78,7 @@ public class OrderAdminController {
     @PutMapping("/{id}")
     public ResponseEntity<OrderResponseDto> updateOrder(
             @PathVariable Long id,
-            @RequestBody OrderRequestDto orderDto) {
+            @Valid @RequestBody OrderRequestDto orderDto) {
 
         OrderResponseDto orderResponseDto = orderClient.updateOrder(id, orderDto);
 
