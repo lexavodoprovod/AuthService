@@ -6,6 +6,7 @@ import com.innowise.authservice.dto.UserDto;
 import com.innowise.authservice.dto.request.ItemDto;
 import com.innowise.authservice.dto.request.OrderItemRequestDto;
 import com.innowise.authservice.dto.request.OrderRequestDto;
+import com.innowise.authservice.dto.request.StatusUpdateRequest;
 import com.innowise.authservice.dto.response.OrderResponseDto;
 import com.innowise.authservice.entity.OrderStatus;
 import com.innowise.authservice.entity.Role;
@@ -202,25 +203,25 @@ class OrderAdminControllerTest extends BaseIT{
         void shouldUpdateStatusForAdmin() throws Exception {
             User admin = User.builder().role(Role.ADMIN).build();
             Long orderId = 100L;
-            OrderStatus newStatus = OrderStatus.PAID;
+            StatusUpdateRequest updateRequest = new StatusUpdateRequest(OrderStatus.PAID);
 
             OrderResponseDto updatedResponse = OrderResponseDto.builder()
                     .id(orderId)
-                    .status(newStatus)
+                    .status(OrderStatus.PAID)
                     .build();
 
-            when(orderClient.updateStatus(eq(orderId), eq(newStatus)))
+            when(orderClient.updateStatus(eq(orderId), eq(updateRequest)))
                     .thenReturn(updatedResponse);
 
             mockMvc.perform(patch("/admin/orders/{id}/status", orderId)
                             .with(user(admin))
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(newStatus)))
+                            .content(objectMapper.writeValueAsString(updateRequest)))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.id").value(orderId))
                     .andExpect(jsonPath("$.status").value("PAID"));
 
-            verify(orderClient).updateStatus(eq(orderId), eq(newStatus));
+            verify(orderClient).updateStatus(eq(orderId), eq(updateRequest));
         }
 
         @Test
