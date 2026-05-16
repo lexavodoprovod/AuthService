@@ -3,7 +3,6 @@ spring:
     url: jdbc:postgresql://auth-db:5432/${DB_NAME}
 eureka:
   instance:
-    prefer-ip-address: false
     hostname: ${spring.application.name}
   client:
     service-url:
