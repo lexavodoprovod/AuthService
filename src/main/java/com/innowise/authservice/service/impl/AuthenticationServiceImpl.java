@@ -116,14 +116,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new NullParameterException();
         }
 
+        String username = loginDto.getUsername();
+        String password = loginDto.getPassword();
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginDto.getUsername(),
-                        loginDto.getPassword()
+                        username,
+                        password
                 )
         );
 
-        String username = loginDto.getUsername();
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
