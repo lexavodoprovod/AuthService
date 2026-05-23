@@ -19,6 +19,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
+    private static final String MESSAGE_KEY = "message";
+    private static final String VALIDATION_ERROR = "Validation Error";
+
     private final ObjectMapper mapper;
 
     @ExceptionHandler(FeignException.class)
@@ -30,8 +33,8 @@ public class GlobalExceptionHandler {
         try {
             Map<String, Object> map = mapper.readValue(errorBody, Map.class);
 
-            if (map.containsKey("message")) {
-                message = map.get("message").toString();
+            if (map.containsKey(MESSAGE_KEY)) {
+                message = map.get(MESSAGE_KEY).toString();
             } else {
                 message = errorBody;
             }
@@ -57,60 +60,35 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InternalServiceException.class)
     public ResponseEntity<ErrorDetails> handleNotFound(InternalServiceException e) {
         HttpStatus status = HttpStatus.SERVICE_UNAVAILABLE;
-        ErrorDetails exception = ErrorDetails.builder()
-                .message(e.getMessage())
-                .errorName(status.getReasonPhrase())
-                .httpStatus(status.value())
-                .timestamp(LocalDateTime.now())
-                .build();
+        ErrorDetails exception = createErrorDetails(e, status);
         return  new ResponseEntity<>(exception, status);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorDetails> handleNotFound(EntityNotFoundException e) {
         HttpStatus notFound = HttpStatus.NOT_FOUND;
-        ErrorDetails exception = ErrorDetails.builder()
-                .message(e.getMessage())
-                .errorName(notFound.getReasonPhrase())
-                .httpStatus(notFound.value())
-                .timestamp(LocalDateTime.now())
-                .build();
+        ErrorDetails exception = createErrorDetails(e, notFound);
         return  new ResponseEntity<>(exception, notFound);
     }
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorDetails> handleConflict(BusinessException e) {
         HttpStatus httpError = e.getStatus();
-        ErrorDetails exception = ErrorDetails.builder()
-                .message(e.getMessage())
-                .errorName(httpError.getReasonPhrase())
-                .httpStatus(httpError.value())
-                .timestamp(LocalDateTime.now())
-                .build();
+        ErrorDetails exception = createErrorDetails(e, httpError);
         return  new ResponseEntity<>(exception, httpError);
     }
 
     @ExceptionHandler(JwtException.class)
     public ResponseEntity<ErrorDetails> handleJwtException(JwtException e) {
         HttpStatus httpError = HttpStatus.UNAUTHORIZED;
-        ErrorDetails exception = ErrorDetails.builder()
-                .message(e.getMessage())
-                .errorName(httpError.getReasonPhrase())
-                .httpStatus(httpError.value())
-                .timestamp(LocalDateTime.now())
-                .build();
+        ErrorDetails exception = createErrorDetails(e, httpError);
         return new ResponseEntity<>(exception, httpError);
     }
 
     @ExceptionHandler(UsernameNotFoundException.class)
     public ResponseEntity<ErrorDetails> handleUsernameException(UsernameNotFoundException e) {
         HttpStatus httpError = HttpStatus.UNAUTHORIZED;
-        ErrorDetails exception = ErrorDetails.builder()
-                .message(e.getMessage())
-                .errorName(httpError.getReasonPhrase())
-                .httpStatus(httpError.value())
-                .timestamp(LocalDateTime.now())
-                .build();
+        ErrorDetails exception = createErrorDetails(e, httpError);
         return new ResponseEntity<>(exception, httpError);
     }
 
@@ -123,11 +101,20 @@ public class GlobalExceptionHandler {
         HttpStatus status = HttpStatus.BAD_REQUEST;
         ErrorDetails error = ErrorDetails.builder()
                 .message(errorMessage)
-                .errorName("Validation Error")
+                .errorName(VALIDATION_ERROR)
                 .httpStatus(status.value())
                 .timestamp(LocalDateTime.now())
                 .build();
         return new ResponseEntity<>(error, status);
+    }
+
+    private ErrorDetails createErrorDetails(Exception e, HttpStatus status) {
+        return ErrorDetails.builder()
+                .message(e.getMessage())
+                .errorName(status.getReasonPhrase())
+                .httpStatus(status.value())
+                .timestamp(LocalDateTime.now())
+                .build();
     }
 
 
